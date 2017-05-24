@@ -54,7 +54,7 @@ def mainlist(item):
             itemlist.append( Item( channel=item.channel, title="Novedades ANIME" , action="foro" , url="https://noestasinvitado.com/anime/" , folder=True ) )
             itemlist.append( Item( channel=item.channel, title="Novedades XXX" , action="foro" , url="https://noestasinvitado.com/18-15/" , folder=True ) )
             itemlist.append( Item( channel=item.channel, title="Listados alfabéticos" , action="indices" , url="https://noestasinvitado.com/indices/" , folder=True ) )
-            itemlist.append( Item( channel=item.channel, title="Buscar...", action="search", text_color="0xFFFF9933") )
+            itemlist.append( Item( channel=item.channel, title="[B]Buscar...[/B]", action="search") )
         else:
             itemlist.append( Item( channel=item.channel , title="Usuario y/o password de NEI incorrecta, revisa la configuración..." , action="" , url="" , folder=False ) )
     return itemlist
