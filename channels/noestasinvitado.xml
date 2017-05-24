@@ -6,7 +6,6 @@
 	<active>true</active>
 	<adult>false</adult>
 	<language>es</language>
-	<include_in_global_search>disabled</include_in_global_search>
 
 	<fanart></fanart>
 	<thumbnail>https://noestasinvitado.com/neiflix_logo_peque.png</thumbnail>
@@ -14,7 +13,7 @@
 
 	<update_url>https://raw.githubusercontent.com/tonikelope/neiflix/master/channels/</update_url>
 	<version>3</version>
-	<date>16/05/2017</date>
+
 	<changes></changes>
 
 	<categories>
