@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<channel>
+	<id>noestasinvitado</id>
+	<name>Noestasinvitado</name>
+
+	<active>true</active>
+	<adult>false</adult>
+	<language>es</language>
+	<include_in_global_search>disabled</include_in_global_search>
+
+	<fanart></fanart>
+	<thumbnail>https://noestasinvitado.com/neiflix_logo_peque.png</thumbnail>
+	<bannermenu>https://noestasinvitado.com/neiflix_logo_peque.png</bannermenu>
+
+	<update_url></update_url>
+	<version>3</version>
+	<date>16/05/2017</date>
+	<changes></changes>
+
+	<categories>
+		<category>movie</category>
+		<category>serie</category>
+	</categories>
+
+	<settings>
+		<id>noestasinvitadouser</id>
+		<type>text</type>
+		<label>@30014</label>
+		<default></default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+	</settings>
+	<settings>
+		<id>noestasinvitadopassword</id>
+		<type>text</type>
+		<label>@30015</label>
+		<hidden>true</hidden>
+		<enabled>!eq(-1,'')</enabled>
+		<visible>true</visible>
+	</settings>
+</channel>
