@@ -120,15 +120,22 @@ def foro(item):
                     else:
                         quality = 'SD'
 
-                    title = content_title+" ("+year+") ["+quality+"] [FA "+rating[0]+"]" + " ("+uploader+")"
-
-                    thumbnail = rating[1].replace('msmall', 'large')
-
                     if rating[0] != "SIN NOTA":
                         if float(rating[0]) >= 7.0:
-                            text_color = '0xFF00FF00'
+                            rating_text = "[COLOR lightgreen][FA "+rating[0]+"][/COLOR]"
                         elif float(rating[0]) < 4.0:
-                            text_color = "0xFFFF0000"
+                            rating_text = "[COLOR lightred][FA "+rating[0]+"][/COLOR]"
+                        else:
+                            rating_text = "[FA "+rating[0]+"]"
+                    else:
+                        rating_text = "[FA ---]"
+
+                    title = "[COLOR darkorange][B]"+content_title+"[/B][/COLOR] ("+year+") ["+quality+"] [B]"+rating_text+ "[/B] ("+uploader+")"
+
+                    if rating[1]:
+                        thumbnail = rating[1].replace('msmall', 'large')
+                    else:
+                        thumbnail = ""
 
                 item.infoLabels = {}
 
@@ -138,7 +145,7 @@ def foro(item):
                 item.parent_title = title.strip()
                 content_title =""
 
-            itemlist.append( item.clone(action=action, title=title, url=url , thumbnail=thumbnail, folder=True, contentTitle=content_title, text_color=text_color) )
+            itemlist.append( item.clone(action=action, title=title, url=url , thumbnail=thumbnail, folder=True, contentTitle=content_title) )
 
         
         patron = '<div class="pagelinks">Páginas:.*?\[<strong>[^<]+</strong>\].*?<a class="navPages" href="(?!\#bot)([^"]+)">[^<]+</a>.*?</div>'
@@ -146,10 +153,10 @@ def foro(item):
         for match in matches:
             if len(matches) > 0:
                 url = match
-                title = ">> Página Siguiente"
+                title = "[B]>> Página Siguiente[/B]"
                 thumbnail = ""
                 plot = ""
-                itemlist.append( item.clone(action="foro", title=title , url=url , thumbnail=thumbnail, folder=True, text_color='0xFFFF9933') )
+                itemlist.append( item.clone(action="foro", title=title , url=url , thumbnail=thumbnail, folder=True) )
 
     return itemlist
 
@@ -655,7 +662,9 @@ def extract_year(title):
 
 def get_filmaffinity_data(title, year):
 
-    url = "http://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre=&fromyear="+year+"&toyear="+year
+    url = "https://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre=&fromyear="+year+"&toyear="+year
+
+    logger.info(url)
 
     data = scrapertools.cache_page(url)
 
@@ -663,24 +672,27 @@ def get_filmaffinity_data(title, year):
 
     if res:
 
-        res_thumb = re.compile("http://pics\\.filmaffinity\\.com/.+-msmall\\.jpg",re.DOTALL).search(data)
+        res_thumb = re.compile("https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",re.DOTALL).search(data)
 
         if res_thumb:
-
             thumb_url = res_thumb.group(0)
+        else:
+            thumb_url = None
 
         return [res.group(1).replace(',','.'), thumb_url]
 
     else:
 
-        url = "http://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre="
+        url = "https://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre="
 
         data = scrapertools.cache_page(url)
 
-        res_thumb = re.compile("http://pics\\.filmaffinity\\.com/.+-msmall\\.jpg",re.DOTALL).search(data)
+        res_thumb = re.compile("https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",re.DOTALL).search(data)
 
         if res_thumb:
             thumb_url = res_thumb.group(0)
+        else:
+            thumb_url = None
 
         res = re.compile("< *?div +class *?= *?\"avgrat-box\" *?> *?([0-9,]+) *?<",re.DOTALL).search(data)
 
@@ -690,4 +702,4 @@ def get_filmaffinity_data(title, year):
 
         else:
 
-            return ["SIN NOTA", ""]
+            return ["SIN NOTA", thumb_url]
