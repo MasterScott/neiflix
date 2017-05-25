@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 #------------------------------------------------------------
 # pelisalacarta - XBMC Plugin
-# Canal para noestasinvitado
+# Canal para noestasinvitado.com
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 #------------------------------------------------------------
 import re
@@ -11,6 +11,7 @@ import urllib2
 import json
 import math
 import os.path
+import os
 import hashlib
 import xbmc
 
@@ -18,19 +19,22 @@ from core import config
 from core import logger
 from core import scrapertools
 from core.item import Item
+from core.filetools import listdir
 from platformcode import platformtools
 
 DEBUG = config.get_setting("debug")
 
 def login():
     
-    logger.info("channels.noestasinvitado login")
+    logger.info("channels.neiflix login")
+
+    check_megaserver_lib()
     
     data = scrapertools.cache_page("https://noestasinvitado.com/login/")
     
-    LOGIN = config.get_setting("noestasinvitadouser", "noestasinvitado")
+    LOGIN = config.get_setting("neiflixuser", "neiflix")
     
-    PASSWORD = config.get_setting("noestasinvitadopassword", "noestasinvitado")
+    PASSWORD = config.get_setting("neiflixpassword", "neiflix")
     
     post = "user="+LOGIN+"&passwrd="+PASSWORD+"&cookielength=-1"
 
@@ -39,11 +43,11 @@ def login():
     return True
 
 def mainlist(item):
-    logger.info("channels.noestasinvitado mainlist")
+    logger.info("channels.neiflix mainlist")
     
     itemlist = []
 
-    if config.get_setting("noestasinvitadouser", "noestasinvitado") == "":
+    if config.get_setting("neiflixuser", "neiflix") == "":
         itemlist.append( Item( channel=item.channel , title="Habilita tu cuenta en la configuración..." , action="settingCanal" , url="" ) )
     else:
         if login():
@@ -54,7 +58,7 @@ def mainlist(item):
             itemlist.append( Item( channel=item.channel, title="Novedades ANIME" , action="foro" , url="https://noestasinvitado.com/anime/" , folder=True ) )
             itemlist.append( Item( channel=item.channel, title="Novedades XXX" , action="foro" , url="https://noestasinvitado.com/18-15/" , folder=True ) )
             itemlist.append( Item( channel=item.channel, title="Listados alfabéticos" , action="indices" , url="https://noestasinvitado.com/indices/" , folder=True ) )
-            itemlist.append( Item( channel=item.channel, title="[B]Buscar...[/B]", action="search") )
+            itemlist.append( Item( channel=item.channel, title="[COLOR yellow][B]Buscar...[/B][/COLOR]", action="search") )
         else:
             itemlist.append( Item( channel=item.channel , title="Usuario y/o password de NEI incorrecta, revisa la configuración..." , action="" , url="" , folder=False ) )
     return itemlist
@@ -63,7 +67,7 @@ def settingCanal(item):
     return platformtools.show_channel_settings()
 
 def foro(item):
-    logger.info("channels.noestasinvitado foro")
+    logger.info("channels.neiflix foro")
 
     itemlist=[]
     
@@ -101,8 +105,6 @@ def foro(item):
 
             thumbnail = ""
 
-            text_color = ""
-
             if final_item:
 
                 content_title = extract_title(scrapedtitle)
@@ -120,11 +122,11 @@ def foro(item):
                     else:
                         quality = 'SD'
 
-                    if rating[0] != "SIN NOTA":
+                    if rating[0]:
                         if float(rating[0]) >= 7.0:
-                            rating_text = "[COLOR lightgreen][FA "+rating[0]+"][/COLOR]"
+                            rating_text = "[COLOR green][FA "+rating[0]+"][/COLOR]"
                         elif float(rating[0]) < 4.0:
-                            rating_text = "[COLOR lightred][FA "+rating[0]+"][/COLOR]"
+                            rating_text = "[COLOR red][FA "+rating[0]+"][/COLOR]"
                         else:
                             rating_text = "[FA "+rating[0]+"]"
                     else:
@@ -193,7 +195,7 @@ def search(item, texto):
         
         item.infoLabels['year'] = year
 
-        itemlist.append( item.clone(action="foro", title=title , url=url , thumbnail=thumbnail, contentTitle=content_title, folder=True, text_color="") )
+        itemlist.append( item.clone(action="foro", title=title , url=url , thumbnail=thumbnail, contentTitle=content_title, folder=True) )
 
     patron = '\[<strong>[0-9]+</strong>\][^<>]*<a class="navPages" href="([^"]+)">'
     
@@ -202,10 +204,10 @@ def search(item, texto):
     if matches:
 
         url=matches.group(1)
-        title = ">> Página Siguiente"
+        title = "[B]>> Página Siguiente[/B]"
         thumbnail = ""
         plot = ""
-        itemlist.append( item.clone(action="search_pag", title=title, url=url, thumbnail=thumbnail, folder=True, text_color='0xFFFF9933') )
+        itemlist.append( item.clone(action="search_pag", title=title, url=url, thumbnail=thumbnail, folder=True) )
 
     return itemlist
 
@@ -238,7 +240,7 @@ def search_pag(item):
         
         item.infoLabels['year'] = year
 
-        itemlist.append( item.clone(action="foro", title=title , url=url , thumbnail=thumbnail, contentTitle=content_title, folder=True, text_color="") )
+        itemlist.append( item.clone(action="foro", title=title , url=url , thumbnail=thumbnail, contentTitle=content_title, folder=True) )
 
     patron = '\[<strong>[0-9]+</strong>\][^<>]*<a class="navPages" href="([^"]+)">'
     
@@ -247,10 +249,10 @@ def search_pag(item):
     if matches:
 
         url=matches.group(1)
-        title = ">> Página Siguiente"
+        title = "[B]>> Página Siguiente[/B]"
         thumbnail = ""
         plot = ""
-        itemlist.append( item.clone(action="search_pag", title=title, url=url, thumbnail=thumbnail, folder=True, text_color='0xFFFF9933') )
+        itemlist.append( item.clone(action="search_pag", title=title, url=url, thumbnail=thumbnail, folder=True) )
 
     return itemlist
 
@@ -392,7 +394,7 @@ def get_mc_links_group(item):
 
                 if compress:
                     
-                    itemlist.append( Item( channel=item.channel , title="ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE (habla con el uploader para que lo suba sin comprimir).", text_color="0xFFFF0000", action="" , url="" , folder=False ) )
+                    itemlist.append( Item( channel=item.channel , title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE (habla con el uploader para que lo suba sin comprimir).[/B][/COLOR]", action="" , url="" , folder=False ) )
                     
                     break
                 
@@ -541,7 +543,7 @@ def find_mc_links(item, data):
                         compress = compress_pattern.search(name)
 
                         if compress:
-                            itemlist.append( Item( channel=item.channel , title="ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE (habla con el uploader para que lo suba sin comprimir).", text_color="0xFFFF0000", action="" , url="" , folder=False ) )
+                            itemlist.append( Item( channel=item.channel , title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE (habla con el uploader para que lo suba sin comprimir).[/B][/COLOR]", action="" , url="" , folder=False ) )
                             break
                         else:
                             title = name+' ['+str(format_bytes(size))+']'
@@ -702,4 +704,35 @@ def get_filmaffinity_data(title, year):
 
         else:
 
-            return ["SIN NOTA", thumb_url]
+            return [None, thumb_url]
+
+
+def check_megaserver_lib():
+
+    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/lib/megaserver/'
+
+    sha1_checksums = {'client.py':'b96fb3044af508130bb3263811e7033729cc0545', 'cursor.py': '62a48eb10a41b7521185c2cc71249ccf497882de', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'dbd6830d1f16a4dfe7a88e102f942186f23c1f5e', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819'}
+
+    modified = 0
+
+    for filename, checksum in sha1_checksums.iteritems():
+
+        if os.path.exists(xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename)) != True:
+
+            urllib.urlretrieve(update_url+filename, xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename))
+
+            modified = 1
+
+        elif hashlib.sha1(open(xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename), 'rb').read()).hexdigest() != checksum:
+
+            os.rename(xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename), xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename+".bak"))
+
+            urllib.urlretrieve(update_url+filename, xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename))
+
+            modified = 1
+
+
+    if modified:
+        platformtools.dialog_notification("NEIFLIX: la libreria de MEGA ha sido corregida", "")
+
+    return modified

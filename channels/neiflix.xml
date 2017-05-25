@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <channel>
-	<id>noestasinvitado</id>
-	<name>Noestasinvitado</name>
+	<id>neiflix</id>
+	<name>NEIFLIX</name>
 
 	<active>true</active>
 	<adult>false</adult>
@@ -22,7 +22,7 @@
 	</categories>
 
 	<settings>
-		<id>noestasinvitadouser</id>
+		<id>neiflixuser</id>
 		<type>text</type>
 		<label>@30014</label>
 		<default></default>
@@ -30,7 +30,7 @@
 		<visible>true</visible>
 	</settings>
 	<settings>
-		<id>noestasinvitadopassword</id>
+		<id>neiflixpassword</id>
 		<type>text</type>
 		<label>@30015</label>
 		<hidden>true</hidden>
