@@ -707,9 +707,12 @@ def get_filmaffinity_data(title, year):
             return [None, thumb_url]
 
 
+#NEIFLIX uses a modified version of MEGASERVER LIB that supports Megacrypter links
 def check_megaserver_lib():
 
     update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/lib/megaserver/'
+
+    megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.pelisalacarta/lib/megaserver/')
 
     sha1_checksums = {'client.py':'b96fb3044af508130bb3263811e7033729cc0545', 'cursor.py': '62a48eb10a41b7521185c2cc71249ccf497882de', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'dbd6830d1f16a4dfe7a88e102f942186f23c1f5e', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819'}
 
@@ -717,22 +720,21 @@ def check_megaserver_lib():
 
     for filename, checksum in sha1_checksums.iteritems():
 
-        if os.path.exists(xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename)) != True:
+        if os.path.exists(megaserver_lib_path+filename) != True:
 
-            urllib.urlretrieve(update_url+filename, xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename))
-
-            modified = 1
-
-        elif hashlib.sha1(open(xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename), 'rb').read()).hexdigest() != checksum:
-
-            os.rename(xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename), xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename+".bak"))
-
-            urllib.urlretrieve(update_url+filename, xbmc.translatePath("special://home/addons/plugin.video.pelisalacarta/lib/megaserver/"+filename))
+            urllib.urlretrieve(update_url+filename, megaserver_lib_path+filename)
 
             modified = 1
 
+        elif hashlib.sha1(open(megaserver_lib_path+filename, 'rb').read()).hexdigest() != checksum:
+
+            os.rename(megaserver_lib_path+filename, megaserver_lib_path+filename+".bak")
+
+            urllib.urlretrieve(update_url+filename, megaserver_lib_path+filename)
+
+            modified = 1
 
     if modified:
-        platformtools.dialog_notification("NEIFLIX: la libreria de MEGA ha sido corregida", "")
+        platformtools.dialog_notification("NEIFLIX: MEGASERVER LIB ACTUALIZADA")
 
     return modified
