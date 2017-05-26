@@ -718,6 +718,9 @@ def check_megaserver_lib():
 
     modified = 0
 
+    if os.path.exists(megaserver_lib_path) == False:
+        os.mkdir(megaserver_lib_path)
+
     for filename, checksum in sha1_checksums.iteritems():
 
         if os.path.exists(megaserver_lib_path+filename) != True:
@@ -735,6 +738,6 @@ def check_megaserver_lib():
             modified = 1
 
     if modified:
-        platformtools.dialog_notification("NEIFLIX: MEGASERVER LIB ACTUALIZADA")
+        platformtools.dialog_notification("NEIFLIX", "Megaserver lib actualizada")
 
     return modified
