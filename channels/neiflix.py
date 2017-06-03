@@ -51,8 +51,8 @@ def mainlist(item):
         itemlist.append( Item( channel=item.channel , title="Habilita tu cuenta en la configuración..." , action="settingCanal" , url="" ) )
     else:
         if login():
-            itemlist.append( Item( channel=item.channel, title="Novedades Películas" , action="foro" , url="https://noestasinvitado.com/peliculas/" , folder=True, fa=True ) )
-            itemlist.append( Item( channel=item.channel, title="Novedades Series" , action="foro" , url="https://noestasinvitado.com/series/" , folder=True ) )
+            itemlist.append( Item( channel=item.channel, title="Novedades Películas" , action="foro" , url="https://noestasinvitado.com/peliculas/" , folder=True, fa=True, fa_genre="" ) )
+            itemlist.append( Item( channel=item.channel, title="Novedades Series" , action="foro" , url="https://noestasinvitado.com/series/" , folder=True , fa=True, fa_genre="TV_SE") )
             itemlist.append( Item( channel=item.channel, title="Novedades documetales" , action="foro" , url="https://noestasinvitado.com/documentales/" , folder=True ) )
             itemlist.append( Item( channel=item.channel, title="Novedades vídeos deportivos" , action="foro" , url="https://noestasinvitado.com/deportes/" , folder=True ) )
             itemlist.append( Item( channel=item.channel, title="Novedades ANIME" , action="foro" , url="https://noestasinvitado.com/anime/" , folder=True ) )
@@ -107,13 +107,15 @@ def foro(item):
 
             if final_item:
 
-                content_title = extract_title(scrapedtitle)
+                parsed_title = parse_title(scrapedtitle)
 
-                year = extract_year(scrapedtitle)
+                content_title = parsed_title['title']
+
+                year = parsed_title['year']
 
                 if item.fa :
 
-                    rating = get_filmaffinity_data(content_title, year)
+                    rating = get_filmaffinity_data(content_title, year, item.fa_genre)
 
                     if item.parent_title.startswith('Ultra HD '):
                         quality = 'UHD'
@@ -132,7 +134,7 @@ def foro(item):
                     else:
                         rating_text = "[FA ---]"
 
-                    title = "[COLOR darkorange][B]"+content_title+"[/B][/COLOR] ("+year+") ["+quality+"] [B]"+rating_text+ "[/B] ("+uploader+")"
+                    title = "[COLOR darkorange][B]"+content_title+"[/B][/COLOR] "+("("+year+")" if year else "")+" ["+quality+"] [B]"+rating_text+ "[/B] ("+uploader+")"
 
                     if rating[1]:
                         thumbnail = rating[1].replace('msmall', 'large')
@@ -187,9 +189,11 @@ def search(item, texto):
 
         thumbnail = ""
 
-        year = extract_year(scrapedtitle)
+        parsed_title = parse_title(scrapedtitle)
 
-        content_title = extract_title(scrapedtitle)
+        year = parsed_title['year']
+
+        content_title = parsed_title['title']
 
         item.infoLabels = {}
         
@@ -232,9 +236,11 @@ def search_pag(item):
 
         thumbnail = ""
 
-        year = extract_year(scrapedtitle)
+        parsed_title = parse_title(scrapedtitle)
 
-        content_title = extract_title(scrapedtitle)
+        year = parsed_title['year']
+
+        content_title = parsed_title['title']
 
         item.infoLabels = {}
         
@@ -571,9 +577,11 @@ def indice_links(item):
 
         scrapedtitle = scrapertools.htmlclean(scrapedtitle)
 
-        content_title = extract_title(scrapedtitle)
+        parsed_title = parse_title(scrapedtitle)
 
-        year = extract_year(scrapedtitle)
+        year = parsed_title['year']
+
+        content_title = parsed_title['title']
 
         if item.title.find('Películas') != -1:
 
@@ -582,7 +590,7 @@ def indice_links(item):
             else:
                 quality = 'SD'
 
-            title = content_title+" ("+year+") ["+quality+"] ("+uploader+")"
+            title = "[COLOR darkorange][B]"+content_title+"[/B][/COLOR] ("+year+") ["+quality+"] ("+uploader+")"
         else:
             title = scrapedtitle
 
@@ -662,9 +670,14 @@ def extract_year(title):
 
         return ""
 
-def get_filmaffinity_data(title, year):
+def parse_title(title):
 
-    url = "https://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre=&fromyear="+year+"&toyear="+year
+    return {'title': extract_title(title), 'year': extract_year(title) }
+
+
+def get_filmaffinity_data(title, year, genre):
+
+    url = "https://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre="+genre+"&fromyear="+year+"&toyear="+year
 
     logger.info(url)
 
@@ -685,7 +698,7 @@ def get_filmaffinity_data(title, year):
 
     else:
 
-        url = "https://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre="
+        url = "https://www.filmaffinity.com/es/advsearch.php?stext="+title.replace(' ','+')+"&stype%5B%5D=title&country=&genre="+genre
 
         data = scrapertools.cache_page(url)
 
