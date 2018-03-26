@@ -15,11 +15,10 @@ import os
 import hashlib
 import xbmc
 
-from core import config
-from core import logger
 from core import scrapertools
 from core.item import Item
 from core.filetools import listdir
+from platformcode import config, logger
 from platformcode import platformtools
 
 DEBUG = config.get_setting("debug")
@@ -725,9 +724,9 @@ def check_megaserver_lib():
 
     update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/lib/megaserver/'
 
-    megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.pelisalacarta/lib/megaserver/')
+    megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py':'b96fb3044af508130bb3263811e7033729cc0545', 'cursor.py': '62a48eb10a41b7521185c2cc71249ccf497882de', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'dbd6830d1f16a4dfe7a88e102f942186f23c1f5e', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819'}
+    sha1_checksums = {'client.py':'8a815761be1f332e6ea370789a28070a367d62cc', 'cursor.py': '62a48eb10a41b7521185c2cc71249ccf497882de', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'dbd6830d1f16a4dfe7a88e102f942186f23c1f5e', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819'}
 
     modified = 0
 

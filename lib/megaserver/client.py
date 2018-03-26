@@ -10,7 +10,7 @@ from Crypto.Cipher import AES
 from file import File
 from handler import Handler
 from server import Server
-from core import logger
+from platformcode import logger
 
 
 class Client(object):
