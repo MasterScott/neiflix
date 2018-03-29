@@ -19,10 +19,16 @@ class Cursor(object):
                 file = self._file._client.api_req({'a': 'g', 'g': 1, 'p': self._file.file_id})
                 self._file.url= file["g"]
             else:
+
+                mc_req_data={'m':'dl', 'link': self._file.info['mc_link'],'reverse': self._file.info['reverse']}
+
                 if 'noexpire' in self._file.info:
-                    mc_dl_res = self._file._client.mc_api_req(self._file.info['mc_api_url'], {'m':'dl', 'link': self._file.info['mc_link'], 'noexpire': self._file.info['noexpire']})
-                else:
-                    mc_dl_res = self._file._client.mc_api_req(self._file.info['mc_api_url'], {'m':'dl', 'link': self._file.info['mc_link']})
+                    mc_req_data['noexpire']=self._file.info['noexpire']
+
+                if 'sid' in self._file.info:
+                    mc_req_data['sid']=self._file.info['sid']
+
+                self._file._client.mc_api_req(self._file.info['mc_api_url'], mc_req_data)
 
                 self._file.url=mc_dl_res['url']
 

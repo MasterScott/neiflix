@@ -10,8 +10,11 @@ from Crypto.Cipher import AES
 from file import File
 from handler import Handler
 from server import Server
-from platformcode import logger
+from platformcode import logger,config
 
+MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
+
+MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:neiflix")
 
 class Client(object):
     VIDEO_EXTS = {'.avi': 'video/x-msvideo', '.mp4': 'video/mp4', '.mkv': 'video/x-matroska',
@@ -103,16 +106,24 @@ class Client(object):
           size = int(url_split[2])
           key = self.base64_to_a32(url_split[3])
           noexpire = url_split[4]
+          mega_sid = url_split[5]
           url_split = url.split('/!')
           mc_api_url = url_split[0]+'/api'
           url = '!'+url_split[1]
 
+          attributes = {'n': name.decode('utf-8'), 'mc_api_url': mc_api_url, 'mc_link':url, 'reverse': MC_REVERSE_DATA}
+
+          mc_req_data = {'m':'dl', 'link': url,'reverse': MC_REVERSE_DATA}
+
           if noexpire:
-            attributes = {'n': name.decode('utf-8'), 'noexpire': noexpire, 'mc_api_url': mc_api_url, 'mc_link':url}
-            mc_dl_res = self.mc_api_req(mc_api_url, {'m':'dl', 'link': url, 'noexpire': noexpire})
-          else:
-            attributes = {'n': name.decode('utf-8'), 'mc_api_url': mc_api_url, 'mc_link':url}
-            mc_dl_res = self.mc_api_req(mc_api_url, {'m':'dl', 'link': url})
+            attributes['noexpire']=noexpire
+            mc_req_data['noexpire']=noexpire
+
+          if mega_sid:
+            attributes['sid']=sid
+            mc_req_data['sid']=sid
+
+          mc_dl_res = self.mc_api_req(mc_api_url, mc_req_data)
 
           file = {'g':mc_dl_res['url'], 's': size}
           self.files.append(File(info = attributes, file_id=-1, key = key, file = file, client = self))

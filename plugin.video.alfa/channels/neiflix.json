@@ -1,0 +1,70 @@
+{
+  "id": "neiflix",
+  "name": "NEIFLIX",
+  "active": true,
+  "adult": true,
+  "language": ["cast"],
+  "thumbnail": "neiflix_t.png",
+  "banner" : "neiflix_b.png",
+  "fanart": "neiflix_fart.png",
+  "categories": [
+    "movie",
+    "tvshow"
+  ],
+  "settings": [
+    {
+      "id": "neiflix_user",
+      "type": "text",
+      "label": "@30014",
+      "enabled": true,
+      "visible": true
+    },
+    {
+      "id": "neiflix_password",
+      "type": "text",
+      "hidden": true,
+      "label": "@30015",
+      "enabled": "!eq(-1,'')",
+      "visible": true
+    },
+    {
+      "id": "neiflix_blacklist_uploaders",
+      "type": "text",
+      "label": "UPLOADERS IGNORADOS (separar por comas)",
+      "default": "",
+      "enabled": true,
+      "visible": true
+    },
+    {
+      "id": "include_in_global_search",
+      "type": "bool",
+      "label": "Incluir en busqueda global",
+      "default": false,
+      "enabled": true,
+      "visible": true
+    },
+    {
+      "id": "neiflix_mc_reverse_port",
+      "type": "text",
+      "label": "MegaCrypter reverse port",
+      "default": "9998",
+      "enabled": true,
+      "visible": true
+    },
+    {
+      "id": "neiflix_mega_email",
+      "type": "text",
+      "label": "MEGA EMAIL",
+      "enabled": true,
+      "visible": true
+    },
+    {
+      "id": "neiflix_mega_password",
+      "type": "text",
+      "hidden": true,
+      "label": "MEGA PASSWORD",
+      "enabled": "!eq(-1,'')",
+      "visible": true
+    }
+  ]
+}

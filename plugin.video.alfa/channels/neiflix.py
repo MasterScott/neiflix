@@ -14,14 +14,29 @@ import os.path
 import os
 import hashlib
 import xbmc
+import base64
 
 from core import scrapertools
 from core.item import Item
 from core.filetools import listdir
 from platformcode import config, logger
 from platformcode import platformtools
+from megaserver import proxy
+from megaserver import Mega
 
 DEBUG = config.get_setting("debug")
+
+MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
+
+MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:neiflix")
+
+MEGA_EMAIL = config.get_setting("neiflix_mega_email", "neiflix")
+
+MEGA_PASSWORD = config.get_setting("neiflix_mega_password", "neiflix")
+
+UPLOADERS_BLACKLIST = [x.strip() for x in config.get_setting("neiflix_blacklist_uploaders", "neiflix").split(',')]
+
+MEGA_SID=''
 
 def login():
     
@@ -31,13 +46,27 @@ def login():
     
     data = scrapertools.cache_page("https://noestasinvitado.com/login/")
     
-    LOGIN = config.get_setting("neiflixuser", "neiflix")
+    LOGIN = config.get_setting("neiflix_user", "neiflix")
     
-    PASSWORD = config.get_setting("neiflixpassword", "neiflix")
+    PASSWORD = config.get_setting("neiflix_password", "neiflix")
     
     post = "user="+LOGIN+"&passwrd="+PASSWORD+"&cookielength=-1"
 
     data = scrapertools.cache_page("https://noestasinvitado.com/login2/" , post=post)
+
+    if MEGA_EMAIL and MEGA_PASSWORD:
+        
+        mega = Mega()
+        
+        try:
+            mega.login(MEGA_EMAIL, MEGA_PASSWORD)
+
+            MEGA_SID=mega.sid
+
+            platformtools.dialog_notification("NEIFLIX", "LOGIN EN MEGA OK!")
+
+        except:
+            logger.info("channels.neiflix ERROR AL HACER LOGIN en MEGA!")
 
     return True
 
@@ -93,62 +122,64 @@ def foro(item):
         
         for scrapedmsg,scrapedurl,scrapedtitle,uploader in matches:
 
-            url = urlparse.urljoin(item.url,scrapedurl)
+            if uploader not in UPLOADERS_BLACKLIST:
 
-            scrapedtitle = scrapertools.htmlclean(scrapedtitle)
+                url = urlparse.urljoin(item.url,scrapedurl)
 
-            if uploader != '>':
-                title = scrapedtitle + " ("+uploader+")"
-            else:
-                title = scrapedtitle
+                scrapedtitle = scrapertools.htmlclean(scrapedtitle)
 
-            thumbnail = ""
+                if uploader != '>':
+                    title = scrapedtitle + " ("+uploader+")"
+                else:
+                    title = scrapedtitle
 
-            if final_item:
+                thumbnail = ""
 
-                parsed_title = parse_title(scrapedtitle)
+                if final_item:
 
-                content_title = parsed_title['title']
+                    parsed_title = parse_title(scrapedtitle)
 
-                year = parsed_title['year']
+                    content_title = parsed_title['title']
 
-                if item.fa :
+                    year = parsed_title['year']
 
-                    rating = get_filmaffinity_data(content_title, year, item.fa_genre)
+                    if item.fa :
 
-                    if item.parent_title.startswith('Ultra HD '):
-                        quality = 'UHD'
-                    elif item.parent_title.startswith('HD '):
-                        quality = 'HD'
-                    else:
-                        quality = 'SD'
+                        rating = get_filmaffinity_data(content_title, year, item.fa_genre)
 
-                    if rating[0]:
-                        if float(rating[0]) >= 7.0:
-                            rating_text = "[COLOR green][FA "+rating[0]+"][/COLOR]"
-                        elif float(rating[0]) < 4.0:
-                            rating_text = "[COLOR red][FA "+rating[0]+"][/COLOR]"
+                        if item.parent_title.startswith('Ultra HD '):
+                            quality = 'UHD'
+                        elif item.parent_title.startswith('HD '):
+                            quality = 'HD'
                         else:
-                            rating_text = "[FA "+rating[0]+"]"
-                    else:
-                        rating_text = "[FA ---]"
+                            quality = 'SD'
 
-                    title = "[COLOR darkorange][B]"+content_title+"[/B][/COLOR] "+("("+year+")" if year else "")+" ["+quality+"] [B]"+rating_text+ "[/B] ("+uploader+")"
+                        if rating[0]:
+                            if float(rating[0]) >= 7.0:
+                                rating_text = "[COLOR green][FA "+rating[0]+"][/COLOR]"
+                            elif float(rating[0]) < 4.0:
+                                rating_text = "[COLOR red][FA "+rating[0]+"][/COLOR]"
+                            else:
+                                rating_text = "[FA "+rating[0]+"]"
+                        else:
+                            rating_text = "[FA ---]"
 
-                    if rating[1]:
-                        thumbnail = rating[1].replace('msmall', 'large')
-                    else:
-                        thumbnail = ""
+                        title = "[COLOR darkorange][B]"+content_title+"[/B][/COLOR] "+("("+year+")" if year else "")+" ["+quality+"] [B]"+rating_text+ "[/B] ("+uploader+")"
 
-                item.infoLabels = {}
+                        if rating[1]:
+                            thumbnail = rating[1].replace('msmall', 'large')
+                        else:
+                            thumbnail = ""
 
-                item.infoLabels['year'] = year
+                    item.infoLabels = {}
 
-            else:
-                item.parent_title = title.strip()
-                content_title =""
+                    item.infoLabels['year'] = year
 
-            itemlist.append( item.clone(action=action, title=title, url=url , thumbnail=thumbnail, folder=True, contentTitle=content_title) )
+                else:
+                    item.parent_title = title.strip()
+                    content_title =""
+
+                itemlist.append( item.clone(action=action, title=title, url=url , thumbnail=thumbnail+"|User-Agent=Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3163.100 Safari/537.36", folder=True, contentTitle=content_title) )
 
         
         patron = '<div class="pagelinks">Páginas:.*?\[<strong>[^<]+</strong>\].*?<a class="navPages" href="(?!\#bot)([^"]+)">[^<]+</a>.*?</div>'
@@ -385,7 +416,7 @@ def get_mc_links_group(item):
                 
                 mc_api_url = url_split[0]+'/api'
                 
-                mc_info_res = mc_api_req(mc_api_url, {'m':'info', 'link': url})
+                mc_info_res = mc_api_req(mc_api_url, {'m':'info', 'link': url, 'reverse' : MC_REVERSE_DATA})
                 
                 name = mc_info_res['name'].replace('#', '')
                 
@@ -411,7 +442,7 @@ def get_mc_links_group(item):
 
                     file.write((url+"\n").encode('utf-8'))
 
-                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item, folder=False))
+                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+MEGA_SID, parentContent=item, folder=False))
 
             file.close()
 
@@ -473,7 +504,7 @@ def find_mc_links(item, data):
 
                     title = name+' ['+str(format_bytes(float(size)))+']'
 
-                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item, folder=False))
+                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+MEGA_SID, parentContent=item, folder=False))
 
                 else:
 
@@ -532,7 +563,7 @@ def find_mc_links(item, data):
                         
                         mc_api_url = url_split[0]+'/api'
                         
-                        mc_info_res = mc_api_req(mc_api_url, {'m':'info', 'link': url})
+                        mc_info_res = mc_api_req(mc_api_url, {'m':'info', 'link': url, 'reverse': MC_REVERSE_DATA})
                         
                         name = mc_info_res['name'].replace('#', '')
                         
@@ -554,7 +585,7 @@ def find_mc_links(item, data):
                             title = name+' ['+str(format_bytes(size))+']'
                             url=url+'#'+name+'#'+str(size)+'#'+key+'#'+noexpire
                             file.write((url+"\n").encode('utf-8'))
-                            itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item, folder=False))
+                            itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+MEGA_SID, parentContent=item, folder=False))
 
                 file.close()
 
@@ -623,6 +654,13 @@ def post(url, data):
     return contents
 
 def mc_api_req(api_url, req):
+
+    try:
+        mega_proxy=proxy.MegaProxyServer('', MC_REVERSE_PORT)
+        mega_proxy.daemon=True
+        mega_proxy.start()
+    except:
+        pass
 
     res = post(api_url, json.dumps(req))
 
@@ -726,7 +764,7 @@ def check_megaserver_lib():
 
     megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py':'8a815761be1f332e6ea370789a28070a367d62cc', 'cursor.py': '62a48eb10a41b7521185c2cc71249ccf497882de', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'dbd6830d1f16a4dfe7a88e102f942186f23c1f5e', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819'}
+    sha1_checksums = {'client.py':'7582d9d256aff47abff52bdfd31409705beecb21', 'crypto':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'a020a44151a6b56f9309190759b7913fe9ee455d'}
 
     modified = 0
 
