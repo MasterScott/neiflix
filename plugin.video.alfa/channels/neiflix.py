@@ -764,7 +764,7 @@ def check_megaserver_lib():
 
     megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py':'7582d9d256aff47abff52bdfd31409705beecb21', 'crypto':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'a020a44151a6b56f9309190759b7913fe9ee455d'}
+    sha1_checksums = {'client.py':'7582d9d256aff47abff52bdfd31409705beecb21', 'crypto.py':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'a020a44151a6b56f9309190759b7913fe9ee455d'}
 
     modified = 0
 
