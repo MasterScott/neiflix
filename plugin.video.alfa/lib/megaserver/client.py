@@ -1,5 +1,6 @@
 import base64
 import sys
+import hashlib
 import json
 import random
 import struct
@@ -14,7 +15,7 @@ from platformcode import logger,config
 
 MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
 
-MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:neiflix")
+MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:"+hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest())
 
 class Client(object):
     VIDEO_EXTS = {'.avi': 'video/x-msvideo', '.mp4': 'video/mp4', '.mkv': 'video/x-matroska',
@@ -106,7 +107,12 @@ class Client(object):
           size = int(url_split[2])
           key = self.base64_to_a32(url_split[3])
           noexpire = url_split[4]
-          mega_sid = url_split[5]
+
+          if len(url_split) > 5:
+            mega_sid = url_split[5]
+          else:
+            mega_sid = None
+
           url_split = url.split('/!')
           mc_api_url = url_split[0]+'/api'
           url = '!'+url_split[1]

@@ -8,14 +8,19 @@ import select
 import time
 import sys
 import re
+import hashlib
+import base64
 from threading import Thread
 from threading import Lock
+from platformcode import config,logger
 
 # Changing the BUFFER_SIZE and delay, you can improve the speed and bandwidth.
 # But when buffer get to high or delay go too down, you can broke things
 BUFFER_SIZE = 4096
 MAX_LISTEN = 10
 CONNECT_PATTERN="CONNECT (.*mega(?:\.co)?\.nz):(443) HTTP/(1\.[01])"
+AUTH_PATTERN="Proxy-Authorization: Basic +(.+)"
+PROXY_PASSWORD=hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
 
 class Forward:
     def __init__(self):
@@ -108,17 +113,29 @@ class MegaProxyServer(Thread):
 
         if data.find("CONNECT") != -1:
 
-            m = re.search(CONNECT_PATTERN, data)
+            m = re.search(AUTH_PATTERN, data)
 
-            forward = Forward().start(m.group(1), int(m.group(2)))
+            proxy_pass = base64.b64decode(m.group(1)).split(':')
 
-            print(m.group(1))
-            
-            if forward:
-                self.input_list.append(forward)
-                self.channel[self.s] = forward
-                self.channel[forward] = self.s
-                self.s.send("HTTP/1.1 200 Connection established\r\nProxy-agent: Neiflix/0.1\r\n\r\n")
+            logger.info("channels.neiflix PROXY "+proxy_pass[1]+" "+PROXY_PASSWORD)
+
+            if proxy_pass[1] == PROXY_PASSWORD:
+
+                m = re.search(CONNECT_PATTERN, data)
+
+                forward = Forward().start(m.group(1), int(m.group(2)))
+
+                print(m.group(1))
+                
+                if forward:
+                    self.input_list.append(forward)
+                    self.channel[self.s] = forward
+                    self.channel[forward] = self.s
+                    self.s.send("HTTP/1.1 200 Connection established\r\nProxy-agent: Neiflix/0.1\r\n\r\n")
+                else:
+                    print "Can't establish connection with remote server.",
+                    print "Closing connection with client side"
+                    self.s.close()
             else:
                 print "Can't establish connection with remote server.",
                 print "Closing connection with client side"

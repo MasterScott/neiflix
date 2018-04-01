@@ -54,7 +54,7 @@
     {
       "id": "neiflix_mega_email",
       "type": "text",
-      "label": "MEGA EMAIL",
+      "label": "MEGA PRO ACCOUNT",
       "enabled": true,
       "visible": true
     },
@@ -62,7 +62,7 @@
       "id": "neiflix_mega_password",
       "type": "text",
       "hidden": true,
-      "label": "MEGA PASSWORD",
+      "label": "MEGA PRO ACCOUNT PASSWORD",
       "enabled": "!eq(-1,'')",
       "visible": true
     }

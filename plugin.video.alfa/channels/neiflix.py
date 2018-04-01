@@ -25,11 +25,9 @@ from platformcode import platformtools
 from megaserver import proxy
 from megaserver import Mega
 
-DEBUG = config.get_setting("debug")
-
 MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
 
-MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:neiflix")
+MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:"+hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest())
 
 MEGA_EMAIL = config.get_setting("neiflix_mega_email", "neiflix")
 
@@ -118,6 +116,8 @@ def mainlist(item):
         itemlist.append( Item( channel=item.channel , title="Habilita tu cuenta en la configuración..." , action="settingCanal" , url="" ) )
     else:
         if login():
+            mega_login(False)
+            load_mega_proxy()
             itemlist.append( Item( channel=item.channel, title="Novedades Películas" , action="foro" , url="https://noestasinvitado.com/peliculas/" , folder=True, fa=True, fa_genre="" ) )
             itemlist.append( Item( channel=item.channel, title="Novedades Series" , action="foro" , url="https://noestasinvitado.com/series/" , folder=True , fa=True, fa_genre="TV_SE") )
             itemlist.append( Item( channel=item.channel, title="Novedades documetales" , action="foro" , url="https://noestasinvitado.com/documentales/" , folder=True ) )
@@ -361,8 +361,7 @@ def gen_index(item):
 
 def get_mc_links_group(item):
 
-    #mega_sid = mega_login(True)
-    mega_sid = ''
+    mega_sid = mega_login(False)
 
     itemlist=[]
 
@@ -522,8 +521,7 @@ def find_mc_links(item, data):
             itemlist = get_mc_links_group(Item(channel=item.channel, action='', title='', url=item.url, mc_group_id=matches[0], folder=True))
     else:
 
-        #mega_sid = mega_login(True)
-        mega_sid=''
+        mega_sid = mega_login(False)
 
         filename_hash = xbmc.translatePath("special://home/temp/kodi_nei_mc_"+hashlib.sha1(item.channel+item.url).hexdigest())
 
@@ -698,7 +696,7 @@ def post(url, data):
 
     return contents
 
-def mc_api_req(api_url, req):
+def load_mega_proxy():
 
     try:
         mega_proxy=proxy.MegaProxyServer('', MC_REVERSE_PORT)
@@ -706,6 +704,10 @@ def mc_api_req(api_url, req):
         mega_proxy.start()
     except:
         pass
+
+def mc_api_req(api_url, req):
+
+    load_mega_proxy()
 
     res = post(api_url, json.dumps(req))
 
@@ -809,7 +811,7 @@ def check_megaserver_lib():
 
     megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py':'f54a53e3b356466dad6749b0a330716d721e81fd', 'crypto.py':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'a020a44151a6b56f9309190759b7913fe9ee455d'}
+    sha1_checksums = {'client.py':'e020bd02bebc4c5af7563424b3be309b4978a143', 'crypto.py':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'd1a821fe6108185ca65545c104e24631eca4b3e1'}
 
     modified = 0
 
