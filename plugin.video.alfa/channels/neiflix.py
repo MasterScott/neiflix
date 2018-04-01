@@ -15,6 +15,7 @@ import os
 import hashlib
 import xbmc
 import base64
+import pickle
 
 from core import scrapertools
 from core.item import Item
@@ -54,19 +55,57 @@ def login():
 
     data = scrapertools.cache_page("https://noestasinvitado.com/login2/" , post=post)
 
+    mega_login()
+
+    return True
+
+def mega_login():
+
     if MEGA_EMAIL and MEGA_PASSWORD:
+
+        filename_hash = xbmc.translatePath("special://home/temp/kodi_nei_mega_"+hashlib.sha1(MEGA_EMAIL+MEGA_PASSWORD).hexdigest())
+
+        login_ok = False
+
+        if os.path.isfile(filename_hash):
+
+            try:
+
+                mega = pickle.load(open(filename_hash, "rb"))
+
+                mega.get_user()
+
+                login_ok = True
+
+            except:
+                pass
+
+        if not login_ok:
         
-        mega = Mega()
-        
-        try:
-            mega.login(MEGA_EMAIL, MEGA_PASSWORD)
+            mega = Mega()
+            
+            try:
+                mega.login(MEGA_EMAIL, MEGA_PASSWORD)
+
+                pickle.dump(mega, open(filename_hash, "wb"))
+
+                login_ok = True
+
+            except:
+                pass
+
+        if login_ok:
+
+            logger.info("channels.neiflix LOGIN EN MEGA OK!")
+            
+            platformtools.dialog_notification("NEIFLIX", "LOGIN EN MEGA OK!")
 
             MEGA_SID=mega.sid
 
-            platformtools.dialog_notification("NEIFLIX", "LOGIN EN MEGA OK!")
-
-        except:
+        else:
             logger.info("channels.neiflix ERROR AL HACER LOGIN en MEGA!")
+                
+            platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN MEGA!")
 
     return True
 
