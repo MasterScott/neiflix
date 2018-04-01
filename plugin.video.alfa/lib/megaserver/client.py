@@ -120,8 +120,8 @@ class Client(object):
             mc_req_data['noexpire']=noexpire
 
           if mega_sid:
-            attributes['sid']=sid
-            mc_req_data['sid']=sid
+            attributes['sid']=mega_sid
+            mc_req_data['sid']=mega_sid
 
           mc_dl_res = self.mc_api_req(mc_api_url, mc_req_data)
 
