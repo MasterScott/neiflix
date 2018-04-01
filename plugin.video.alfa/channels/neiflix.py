@@ -39,8 +39,6 @@ def login():
     
     logger.info("channels.neiflix login")
 
-    check_megaserver_lib()
-    
     scrapertools.cache_page("https://noestasinvitado.com/login/")
     
     LOGIN = config.get_setting("neiflix_user", "neiflix")
@@ -116,6 +114,7 @@ def mainlist(item):
         itemlist.append( Item( channel=item.channel , title="Habilita tu cuenta en la configuración..." , action="settingCanal" , url="" ) )
     else:
         if login():
+        	check_megaserver_lib()
             mega_login(False)
             load_mega_proxy()
             itemlist.append( Item( channel=item.channel, title="Novedades Películas" , action="foro" , url="https://noestasinvitado.com/peliculas/" , folder=True, fa=True, fa_genre="" ) )
