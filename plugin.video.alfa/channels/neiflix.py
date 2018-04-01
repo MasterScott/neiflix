@@ -37,15 +37,13 @@ MEGA_PASSWORD = config.get_setting("neiflix_mega_password", "neiflix")
 
 UPLOADERS_BLACKLIST = [x.strip() for x in config.get_setting("neiflix_blacklist_uploaders", "neiflix").split(',')]
 
-MEGA_SID=''
-
 def login():
     
     logger.info("channels.neiflix login")
 
     check_megaserver_lib()
     
-    data = scrapertools.cache_page("https://noestasinvitado.com/login/")
+    scrapertools.cache_page("https://noestasinvitado.com/login/")
     
     LOGIN = config.get_setting("neiflix_user", "neiflix")
     
@@ -55,11 +53,11 @@ def login():
 
     data = scrapertools.cache_page("https://noestasinvitado.com/login2/" , post=post)
 
-    mega_login()
+    return (data.find(LOGIN) != -1)
 
-    return True
+def mega_login(verbose):
 
-def mega_login():
+    mega_sid = ''
 
     if MEGA_EMAIL and MEGA_PASSWORD:
 
@@ -96,18 +94,20 @@ def mega_login():
 
         if login_ok:
 
+            mega_sid = mega.sid
+            
             logger.info("channels.neiflix LOGIN EN MEGA OK!")
             
-            platformtools.dialog_notification("NEIFLIX", "LOGIN EN MEGA OK!")
-
-            MEGA_SID=mega.sid
+            if verbose:
+            	platformtools.dialog_notification("NEIFLIX", "LOGIN EN MEGA OK!")
 
         else:
             logger.info("channels.neiflix ERROR AL HACER LOGIN en MEGA!")
-                
-            platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN MEGA!")
+            
+            if verbose:    
+            	platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN MEGA!")
 
-    return True
+    return mega_sid
 
 def mainlist(item):
     logger.info("channels.neiflix mainlist")
@@ -361,6 +361,9 @@ def gen_index(item):
 
 def get_mc_links_group(item):
 
+    #mega_sid = mega_login(True)
+    mega_sid = ''
+
     itemlist=[]
 
     id = item.mc_group_id
@@ -481,7 +484,7 @@ def get_mc_links_group(item):
 
                     file.write((url+"\n").encode('utf-8'))
 
-                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+MEGA_SID, parentContent=item, folder=False))
+                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+mega_sid, parentContent=item, folder=False))
 
             file.close()
 
@@ -519,6 +522,9 @@ def find_mc_links(item, data):
             itemlist = get_mc_links_group(Item(channel=item.channel, action='', title='', url=item.url, mc_group_id=matches[0], folder=True))
     else:
 
+        #mega_sid = mega_login(True)
+        mega_sid=''
+
         filename_hash = xbmc.translatePath("special://home/temp/kodi_nei_mc_"+hashlib.sha1(item.channel+item.url).hexdigest())
 
         if os.path.isfile(filename_hash):
@@ -543,7 +549,7 @@ def find_mc_links(item, data):
 
                     title = name+' ['+str(format_bytes(float(size)))+']'
 
-                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+MEGA_SID, parentContent=item, folder=False))
+                    itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+mega_sid, parentContent=item, folder=False))
 
                 else:
 
@@ -624,7 +630,7 @@ def find_mc_links(item, data):
                             title = name+' ['+str(format_bytes(size))+']'
                             url=url+'#'+name+'#'+str(size)+'#'+key+'#'+noexpire
                             file.write((url+"\n").encode('utf-8'))
-                            itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+MEGA_SID, parentContent=item, folder=False))
+                            itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url+'#'+mega_sid, parentContent=item, folder=False))
 
                 file.close()
 
@@ -803,7 +809,7 @@ def check_megaserver_lib():
 
     megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py':'7582d9d256aff47abff52bdfd31409705beecb21', 'crypto.py':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'a020a44151a6b56f9309190759b7913fe9ee455d'}
+    sha1_checksums = {'client.py':'f54a53e3b356466dad6749b0a330716d721e81fd', 'crypto.py':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'a020a44151a6b56f9309190759b7913fe9ee455d'}
 
     modified = 0
 
