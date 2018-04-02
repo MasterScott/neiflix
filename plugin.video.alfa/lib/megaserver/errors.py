@@ -9,6 +9,5 @@ class RequestError(Exception):
     """
     Error in API request
     """
-    #TODO add error response messages
+    # TODO add error response messages
     pass
-

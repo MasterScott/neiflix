@@ -1,19 +1,10 @@
 import re
-import json
-from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
-from Crypto.Util import Counter
-import os
-import random
-import binascii
-import shutil
 from .errors import ValidationError, RequestError
 from .crypto import *
-import tempfile
 import json
 import urllib
 import urllib2
-import sys
 
 
 class Mega(object):
@@ -40,7 +31,7 @@ class Mega(object):
         password_aes = prepare_key(str_to_a32(password))
         uh = stringhash(email, password_aes)
         resp = self._api_request({'a': 'us', 'user': email, 'uh': uh})
-        #if numeric error code response
+        # if numeric error code response
         if isinstance(resp, int):
             raise RequestError(resp)
         self._login_process(resp, password_aes)
@@ -58,7 +49,7 @@ class Mega(object):
         })
 
         resp = self._api_request({'a': 'us', 'user': user})
-        #if numeric error code response
+        # if numeric error code response
         if isinstance(resp, int):
             raise RequestError(resp)
         self._login_process(resp, password_key)
@@ -81,9 +72,9 @@ class Mega(object):
             self.rsa_private_key = [0, 0, 0, 0]
 
             for i in range(4):
-                l = ((ord(private_key[0]) * 256 + ord(private_key[1]) + 7) / 8) + 2
-                self.rsa_private_key[i] = mpi_to_int(private_key[:l])
-                private_key = private_key[l:]
+                offset = ((ord(private_key[0]) * 256 + ord(private_key[1]) + 7) / 8) + 2
+                self.rsa_private_key[i] = mpi_to_int(private_key[:offset])
+                private_key = private_key[offset:]
 
             encrypted_sid = mpi_to_int(base64_url_decode(resp['csid']))
             rsa_decrypter = RSA.construct(
@@ -102,42 +93,46 @@ class Mega(object):
         if self.sid:
             params.update({'sid': self.sid})
 
-        #ensure input data is a list
+        # ensure input data is a list
         if not isinstance(data, list):
             data = [data]
 
         url = '{0}://g.api.{1}/cs?{2}'.format(self.schema, self.domain, urllib.urlencode(params))
 
-        res=self._post(url, json.dumps(data))
+        res = self._post(url, json.dumps(data))
 
         json_resp = json.loads(res)
 
-        #if numeric error code response
+        # if numeric error code response
         if isinstance(json_resp, int):
             raise RequestError(json_resp)
         return json_resp[0]
 
     def _post(self, url, data):
-    
+
         import ssl
         from functools import wraps
+
         def sslwrap(func):
             @wraps(func)
             def bar(*args, **kw):
                 kw['ssl_version'] = ssl.PROTOCOL_TLSv1
                 return func(*args, **kw)
+
             return bar
 
         ssl.wrap_socket = sslwrap(ssl.wrap_socket)
 
-        request = urllib2.Request(url, data=data, headers={"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36"})
+        request = urllib2.Request(url, data=data, headers={
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 "
+                          "(KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36"})
 
         contents = urllib2.urlopen(request).read()
 
         return contents
 
     def _parse_url(self, url):
-        #parse file id and key from url
+        # parse file id and key from url
         if '!' in url:
             match = re.findall(r'/#!(.*)', url)
             path = match[0]
@@ -220,7 +215,7 @@ class Mega(object):
 
     ##########################################################################
     # GET
-    
+
     def find_path_descriptor(self, path):
         """
         Find descriptor of folder inside a path. i.e.: folder1/folder2/folder3
@@ -247,7 +242,7 @@ class Mega(object):
                 else:
                     return None
         return parent_desc
-    
+
     def find(self, filename):
         """
         Return file object from given filename
@@ -267,7 +262,7 @@ class Mega(object):
         self._init_shared_keys(files, shared_keys)
         for file in files['f']:
             processed_file = self._process_file(file, shared_keys)
-            #ensure each file has a name before returning
+            # ensure each file has a name before returning
             if processed_file['a']:
                 files_dict[file['h']] = processed_file
         return files_dict
@@ -347,7 +342,7 @@ class Mega(object):
         return files_dict
 
     def get_id_from_public_handle(self, public_handle):
-        #get node data
+        # get node data
         node_data = self._api_request({'a': 'f', 'f': 1, 'p': public_handle})
         node_id = self.get_id_from_obj(node_data)
         return node_id
@@ -368,7 +363,7 @@ class Mega(object):
         Get current remaining disk quota in MegaBytes
         """
         json_resp = self._api_request({'a': 'uq', 'xfer': 1})
-        #convert bytes to megabyes
+        # convert bytes to megabyes
         return json_resp['mstrg'] / 1048576
 
     def get_storage_space(self, giga=False, mega=False, kilo=False):
@@ -401,4 +396,3 @@ class Mega(object):
         user_data = self._api_request({"a": "uq", "pro": 1})
         if 'balance' in user_data:
             return user_data['balance']
-

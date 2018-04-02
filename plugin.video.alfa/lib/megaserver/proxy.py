@@ -1,26 +1,20 @@
-#!/usr/bin/python
-# This is a simple port-forward / proxy, written using only the default python
-# library. If you want to make a suggestion or fix something you can contact-me
-# at voorloop_at_gmail.com
-# Distributed over IDC(I Don't Care) license
 import socket
 import select
-import time
-import sys
 import re
 import hashlib
 import base64
 from threading import Thread
 from threading import Lock
-from platformcode import config,logger
+from platformcode import config, logger
 
 # Changing the BUFFER_SIZE and delay, you can improve the speed and bandwidth.
 # But when buffer get to high or delay go too down, you can broke things
 BUFFER_SIZE = 4096
 MAX_LISTEN = 10
-CONNECT_PATTERN="CONNECT (.*mega(?:\.co)?\.nz):(443) HTTP/(1\.[01])"
-AUTH_PATTERN="Proxy-Authorization: Basic +(.+)"
-PROXY_PASSWORD=hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
+CONNECT_PATTERN = "CONNECT (.*mega(?:\.co)?\.nz):(443) HTTP/(1\.[01])"
+AUTH_PATTERN = "Proxy-Authorization: Basic +(.+)"
+PROXY_PASSWORD = hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
+
 
 class Forward:
     def __init__(self):
@@ -34,15 +28,16 @@ class Forward:
             print e
             return False
 
+
 class MegaProxyServer(Thread):
-    stop=False
+    stop = False
     input_list = []
     channel = {}
 
     def synchronized(func):
-    
+
         func.__lock__ = Lock()
-            
+
         def synced_func(*args, **kws):
             with func.__lock__:
                 return func(*args, **kws)
@@ -59,16 +54,16 @@ class MegaProxyServer(Thread):
     @synchronized
     def stop_server(self):
         print "Stopping server..."
-        self.stop=True
+        self.stop = True
 
     @synchronized
-    def isStopServer(self):
+    def is_stop_server(self):
         return self.stop
 
     def run(self):
         self.input_list.append(self.server)
 
-        while not self.isStopServer():
+        while not self.is_stop_server():
             ss = select.select
             inputready, outputready, exceptready = ss(self.input_list, [], [], 1.0)
             for self.s in inputready:
@@ -86,16 +81,16 @@ class MegaProxyServer(Thread):
         print "Bye bye"
 
     def on_accept(self):
-        
+
         clientsock, clientaddress = self.server.accept()
-        
+
         print clientaddress, "has connected"
-        
+
         self.input_list.append(clientsock)
 
     def on_close(self):
         print self.s.getpeername(), "has disconnected"
-        #remove objects from input_list
+        # remove objects from input_list
         self.input_list.remove(self.s)
         self.input_list.remove(self.channel[self.s])
         out = self.channel[self.s]
@@ -108,7 +103,7 @@ class MegaProxyServer(Thread):
         del self.channel[self.s]
 
     def on_recv(self):
-        
+
         data = self.data
 
         if data.find("CONNECT") != -1:
@@ -117,7 +112,7 @@ class MegaProxyServer(Thread):
 
             proxy_pass = base64.b64decode(m.group(1)).split(':')
 
-            logger.info("channels.neiflix PROXY "+proxy_pass[1]+" "+PROXY_PASSWORD)
+            logger.info("channels.neiflix PROXY " + proxy_pass[1] + " " + PROXY_PASSWORD)
 
             if proxy_pass[1] == PROXY_PASSWORD:
 
@@ -126,7 +121,7 @@ class MegaProxyServer(Thread):
                 forward = Forward().start(m.group(1), int(m.group(2)))
 
                 print(m.group(1))
-                
+
                 if forward:
                     self.input_list.append(forward)
                     self.channel[self.s] = forward
