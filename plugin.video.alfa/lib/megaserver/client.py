@@ -13,14 +13,13 @@ from handler import Handler
 from server import Server
 from platformcode import logger,config
 
-MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
-
-MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:"+hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest())
 
 class Client(object):
     VIDEO_EXTS = {'.avi': 'video/x-msvideo', '.mp4': 'video/mp4', '.mkv': 'video/x-matroska',
                   '.m4v': 'video/mp4', '.mov': 'video/quicktime', '.mpg': 'video/mpeg','.ogv': 'video/ogg',
                   '.ogg': 'video/ogg', '.webm': 'video/webm', '.ts': 'video/mp2t', '.3gp': 'video/3gpp'}
+
+    MC_REVERSE_DATA = config.get_setting("neiflix_mc_reverse_port", "neiflix")+":"+base64.b64encode("neiflix:"+hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest())
 
     def __init__(self, url, port=None, ip=None, auto_shutdown=True, wait_time=20, timeout=5, is_playing_fnc=None):
 
@@ -106,7 +105,11 @@ class Client(object):
           name = url_split[1]
           size = int(url_split[2])
           key = self.base64_to_a32(url_split[3])
-          noexpire = url_split[4]
+
+          if len(url_split) > 4:
+            noexpire = url_split[4]
+          else:
+            noexpire = None
 
           if len(url_split) > 5:
             mega_sid = url_split[5]
@@ -117,9 +120,9 @@ class Client(object):
           mc_api_url = url_split[0]+'/api'
           url = '!'+url_split[1]
 
-          attributes = {'n': name.decode('utf-8'), 'mc_api_url': mc_api_url, 'mc_link':url, 'reverse': MC_REVERSE_DATA}
+          attributes = {'n': name.decode('utf-8'), 'mc_api_url': mc_api_url, 'mc_link':url, 'reverse': self.MC_REVERSE_DATA}
 
-          mc_req_data = {'m':'dl', 'link': url,'reverse': MC_REVERSE_DATA}
+          mc_req_data = {'m':'dl', 'link': url,'reverse': self.MC_REVERSE_DATA}
 
           if noexpire:
             attributes['noexpire']=noexpire
