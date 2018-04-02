@@ -15,7 +15,7 @@
     {
       "id": "neiflix_user",
       "type": "text",
-      "label": "@30014",
+      "label": "Usuario de NOESTASINVITADO.COM",
       "enabled": true,
       "visible": true
     },
@@ -23,7 +23,7 @@
       "id": "neiflix_password",
       "type": "text",
       "hidden": true,
-      "label": "@30015",
+      "label": "Password de NOESTASINVITADO.COM",
       "enabled": "!eq(-1,'')",
       "visible": true
     },
@@ -38,23 +38,23 @@
     {
       "id": "include_in_global_search",
       "type": "bool",
-      "label": "Incluir en busqueda global",
+      "label": "Incluir NEIFLIX en la búsqueda global",
       "default": false,
       "enabled": true,
       "visible": true
     },
     {
-      "id": "neiflix_mc_reverse_port",
-      "type": "text",
-      "label": "MegaCrypter reverse port",
-      "default": "9998",
+      "id": "neiflix_mega_premium",
+      "type": "bool",
+      "label": "Usar cuenta PREMIUM de MEGA",
+      "default": false,
       "enabled": true,
       "visible": true
     },
     {
       "id": "neiflix_mega_email",
       "type": "text",
-      "label": "MEGA PRO ACCOUNT",
+      "label": "Usuario de MEGA",
       "enabled": true,
       "visible": true
     },
@@ -62,8 +62,16 @@
       "id": "neiflix_mega_password",
       "type": "text",
       "hidden": true,
-      "label": "MEGA PRO ACCOUNT PASSWORD",
+      "label": "Password de MEGA",
       "enabled": "!eq(-1,'')",
+      "visible": true
+    },
+    {
+      "id": "neiflix_mc_reverse_port",
+      "type": "text",
+      "label": "Puerto para MEGACRYPTER REVERSE MODE",
+      "default": "9998",
+      "enabled": true,
       "visible": true
     }
   ]

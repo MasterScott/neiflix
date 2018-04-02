@@ -29,6 +29,8 @@ MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
 
 MC_REVERSE_DATA = str(MC_REVERSE_PORT)+":"+base64.b64encode("neiflix:"+hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest())
 
+USE_MEGA_PREMIUM = config.get_setting("neiflix_mega_premium", "neiflix")
+
 MEGA_EMAIL = config.get_setting("neiflix_mega_email", "neiflix")
 
 MEGA_PASSWORD = config.get_setting("neiflix_mega_password", "neiflix")
@@ -55,7 +57,7 @@ def mega_login(verbose):
 
     mega_sid = ''
 
-    if MEGA_EMAIL and MEGA_PASSWORD:
+    if USE_MEGA_PREMIUM and MEGA_EMAIL and MEGA_PASSWORD:
 
         filename_hash = xbmc.translatePath("special://home/temp/kodi_nei_mega_"+hashlib.sha1(MEGA_EMAIL+MEGA_PASSWORD).hexdigest())
 
@@ -810,7 +812,7 @@ def check_megaserver_lib():
 
     megaserver_lib_path = xbmc.translatePath('special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py':'e020bd02bebc4c5af7563424b3be309b4978a143', 'crypto.py':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'd1a821fe6108185ca65545c104e24631eca4b3e1'}
+    sha1_checksums = {'client.py':'e37c468fb8ac19b1599e7c1e779f16ea1defd651', 'crypto.py':'652eded07275cc8a68ea4e9f394532bf902d0af5', 'cursor.py': '184e9aa4d2fb6659d18e49988343c6685ebadbd5', 'errors.py': '3bea276cde2b8c92f93b1ee95dc3435a217ded0e', 'file.py':'249027daddd6f8aad6cbd169180f71b7b6b143e9', 'handler.py':'7b628072a6606fd6da47a95a184d42913d01fe2f', '__init__.py':'a79327ea97139d05810251d6e32ebc835a9b7b49', 'server.py':'2128a794724c0d58aaaa10668f10bd62823f1819', 'mega.py':'a2734decd6d86845e9f1ecaf6dcdcc5be8cde14a','proxy.py': 'd1a821fe6108185ca65545c104e24631eca4b3e1'}
 
     modified = 0
 
