@@ -13,7 +13,6 @@ BUFFER_SIZE = 4096
 MAX_LISTEN = 10
 CONNECT_PATTERN = "CONNECT (.*mega(?:\.co)?\.nz):(443) HTTP/(1\.[01])"
 AUTH_PATTERN = "Proxy-Authorization: Basic +(.+)"
-PROXY_PASSWORD = hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
 
 
 class Forward:
@@ -44,8 +43,9 @@ class MegaProxyServer(Thread):
 
         return synced_func
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, password):
         Thread.__init__(self)
+        self.password = password
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((host, port))
@@ -112,9 +112,9 @@ class MegaProxyServer(Thread):
 
             proxy_pass = base64.b64decode(m.group(1)).split(':')
 
-            logger.info("channels.neiflix PROXY " + proxy_pass[1] + " " + PROXY_PASSWORD)
+            logger.info("channels.neiflix PROXY " + proxy_pass[1] + " " + self.password)
 
-            if proxy_pass[1] == PROXY_PASSWORD:
+            if proxy_pass[1] == self.password:
 
                 m = re.search(CONNECT_PATTERN, data)
 

@@ -23,8 +23,10 @@ from megaserver import proxy, Mega
 
 MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
 
+MC_REVERSE_PASS = hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
+
 MC_REVERSE_DATA = str(MC_REVERSE_PORT) + ":" + base64.b64encode(
-    "neiflix:" + hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest())
+    "neiflix:" + MC_REVERSE_PASS)
 
 USE_MEGA_PREMIUM = config.get_setting("neiflix_mega_premium", "neiflix")
 
@@ -126,7 +128,7 @@ def mainlist(item):
         if login():
             check_megaserver_lib()
             mega_login(False)
-            load_mega_proxy()
+            load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
             itemlist.append(Item(channel=item.channel, title="Novedades Películas", action="foro",
                                  url="https://noestasinvitado.com/peliculas/", folder=True, fa=True, fa_genre=""))
             itemlist.append(Item(channel=item.channel, title="Novedades Series", action="foro",
@@ -802,9 +804,9 @@ def post(url, data):
     return contents
 
 
-def load_mega_proxy():
+def load_mega_proxy(host, port, password):
     try:
-        mega_proxy = proxy.MegaProxyServer('', MC_REVERSE_PORT)
+        mega_proxy = proxy.MegaProxyServer(host, port, password)
         mega_proxy.daemon = True
         mega_proxy.start()
     except socket.error:
@@ -812,7 +814,7 @@ def load_mega_proxy():
 
 
 def mc_api_req(api_url, req):
-    load_mega_proxy()
+    load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
 
     res = post(api_url, json.dumps(req))
 
@@ -936,16 +938,16 @@ def check_megaserver_lib():
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py': 'c1742a49b3053861280b446dc7b901536beb5a3b',
+    sha1_checksums = {'client.py': 'bc5bc1bff072fdbeef84f21a104480b71386af2f',
                       'crypto.py': 'a6db68758d1045bc8293f25dfb302b2b2086370c',
-                      'cursor.py': '4cda5b409dc876eee531e91f3f6612fb7385371b',
+                      'cursor.py': 'aa4db8e342b020e74757294c2ca1dfdfdc9e11ff',
                       'errors.py': 'a799c27134f696413b9fae333ec7130f6ebd5da0',
                       'file.py': '865b1c2356464ad76254dab71f90ccd40ea32d0e',
                       'handler.py': '949b5247ed28d3f95aa1c1563b1b45354f25fb2d',
                       '__init__.py': '5a2a5f6113e1b0dc9d0ef34a026511a1cf5135e4',
-                      'server.py': '8694df96152941ed08f3e37e640dd95d8b6ab4b6',
                       'mega.py': '20975e9048a87f84a7826c36bd65439ef8aeb273',
-                      'proxy.py': '1dea0c84e2e206682e055ab332a910580680a2a8'}
+                      'proxy.py': 'da2dfa4973b8bc282a55fead5f8d93cd740a72c8',
+                      'server.py': '8694df96152941ed08f3e37e640dd95d8b6ab4b6'}
 
     modified = 0
 

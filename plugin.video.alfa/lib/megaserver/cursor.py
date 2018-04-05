@@ -22,10 +22,13 @@ class Cursor(object):
                 self._file.url = file["g"]
             else:
 
-                mc_req_data = {'m': 'dl', 'link': self._file.info['mc_link'], 'reverse': self._file.info['reverse']}
+                mc_req_data = {'m': 'dl', 'link': self._file.info['mc_link']}
 
                 if 'noexpire' in self._file.info:
                     mc_req_data['noexpire'] = self._file.info['noexpire']
+
+                if 'reverse' in self._file.info:
+                    mc_req_data['reverse'] = self._file.info['reverse']
 
                 if 'sid' in self._file.info:
                     mc_req_data['sid'] = self._file.info['sid']

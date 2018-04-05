@@ -11,6 +11,7 @@ from Crypto.Cipher import AES
 from file import File
 from handler import Handler
 from server import Server
+from proxy import MegaProxyServer
 from platformcode import logger, config
 
 
@@ -18,9 +19,6 @@ class Client(object):
     VIDEO_EXTS = {'.avi': 'video/x-msvideo', '.mp4': 'video/mp4', '.mkv': 'video/x-matroska',
                   '.m4v': 'video/mp4', '.mov': 'video/quicktime', '.mpg': 'video/mpeg', '.ogv': 'video/ogg',
                   '.ogg': 'video/ogg', '.webm': 'video/webm', '.ts': 'video/mp2t', '.3gp': 'video/3gpp'}
-
-    MC_REVERSE_DATA = config.get_setting("neiflix_mc_reverse_port", "neiflix") + ":" + base64.b64encode(
-        "neiflix:" + hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest())
 
     def __init__(self, url, port=None, ip=None, auto_shutdown=True, wait_time=20, timeout=5, is_playing_fnc=None):
 
@@ -49,6 +47,14 @@ class Client(object):
         t.setDaemon(True)
         t.start()
         logger.info("MEGA Server Started")
+
+    def load_mega_proxy(host, port, password):
+        try:
+            mega_proxy = MegaProxyServer(host, port, password)
+            mega_proxy.daemon = True
+            mega_proxy.start()
+        except socket.error:
+            pass
 
     def _auto_shutdown(self):
         while self.running:
@@ -117,7 +123,12 @@ class Client(object):
                 noexpire = None
 
             if len(url_split) > 5:
-                mega_sid = url_split[5]
+                reverse = url_split[5]
+            else:
+                reverse = None
+
+            if len(url_split) > 6:
+                mega_sid = url_split[6]
             else:
                 mega_sid = None
 
@@ -125,14 +136,20 @@ class Client(object):
             mc_api_url = url_split[0] + '/api'
             url = '!' + url_split[1]
 
-            attributes = {'n': name.decode('utf-8'), 'mc_api_url': mc_api_url, 'mc_link': url,
-                          'reverse': self.MC_REVERSE_DATA}
+            attributes = {'n': name.decode('utf-8'), 'mc_api_url': mc_api_url, 'mc_link': url}
 
-            mc_req_data = {'m': 'dl', 'link': url, 'reverse': self.MC_REVERSE_DATA}
+            mc_req_data = {'m': 'dl', 'link': url}
 
             if noexpire:
                 attributes['noexpire'] = noexpire
                 mc_req_data['noexpire'] = noexpire
+
+            if reverse:
+                attributes['reverse'] = reverse
+                mc_req_data['reverse'] = reverse
+                mega_proxy_port = reverse.split(":")[0]
+                mega_proxy_pass = base64.b64decode(reverse.split(":")[1]).split(":")[1]
+                load_mega_proxy('',mega_proxy_port,mega_proxy_pass)
 
             if mega_sid:
                 attributes['sid'] = mega_sid
