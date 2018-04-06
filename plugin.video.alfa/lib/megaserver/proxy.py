@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #Basado en el código de gschizas
 
 import socket

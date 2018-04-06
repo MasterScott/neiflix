@@ -938,16 +938,16 @@ def check_megaserver_lib():
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py': 'a1abf46d666c0341bbacb0f4939dee37e2372b0f',
-                      'crypto.py': '3a836de6f3e5a2639c91e9966586bcb23ebe99c3',
-                      'cursor.py': 'e8e7450f8fe3a7baca643517407b3889ae9f9395',
-                      'errors.py': 'a38c059b9b135123e6bf0b4af1b5167e92f93959',
-                      'file.py': '9d931950f9cafccf13c458a84d2412a632f376bc',
-                      'handler.py': '5b24361598eee3663a4cdfe472cd7f7c166de9f9',
-                      '__init__.py': '1e4dd9675fad12ce4ca97d128c7b9000497d4323',
-                      'mega.py': '847dbc1bb24b2f3c29649748638999ee7ebd277e',
-                      'proxy.py': '069018864a3250123ce9c33c735c462939e3a091',
-                      'server.py': '40786928d104ae3baf260d8f25cf7f1be6d471ac'}
+    sha1_checksums = {'client.py': '1dff2e2d0e3ed7e1d4d9b24121df46097a5d4214',
+                      'crypto.py': 'b84e0ce32d03cf018bbdf2c4b9fd736b845aa22c',
+                      'cursor.py': '8e35a24e5f9a06faa0c1610e45fbe42d47d353ee',
+                      'errors.py': '7f15f2cd731d681a08ef735c3ef305a6f38a6310',
+                      'file.py': 'b8f15904b43413256453b405ad266dd7fdad0136',
+                      'handler.py': '822fd9fb281751451f87aeb7a1f90b8cac1e391c',
+                      '__init__.py': 'a2f7108c87b38cada3eda18637c6bdb2eb38ac47',
+                      'mega.py': '63a74bb21542158d9ecbaac3613b8d2885355a8c',
+                      'proxy.py': '64b82005bb66d5fe422591177793428b65a54bbf',
+                      'server.py': '0431d99be5da28874ef371bf8e735fa6be37c5ec'}
 
     modified = 0
 

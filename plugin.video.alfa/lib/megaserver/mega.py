@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #Extraído de la librería de MEGA de richardasaurus
 
 import re
