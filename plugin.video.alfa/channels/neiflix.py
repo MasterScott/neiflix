@@ -19,7 +19,6 @@ from core import scrapertools
 from core.item import Item
 from platformcode import config, logger
 from platformcode import platformtools
-from megaserver import proxy, Mega
 
 MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
 
@@ -126,7 +125,6 @@ def mainlist(item):
                  url=""))
     else:
         if login():
-            check_megaserver_lib()
             mega_login(False)
             load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
             itemlist.append(Item(channel=item.channel, title="Novedades Películas", action="foro",
@@ -933,7 +931,7 @@ def get_filmaffinity_data(title, year, genre):
 # NEIFLIX uses a modified version of MEGASERVER LIB that supports
 # Megacrypter links
 def check_megaserver_lib():
-    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/lib/megaserver/'
+    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/lib/megaserver/'
 
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
@@ -984,3 +982,7 @@ def check_megaserver_lib():
             "NEIFLIX", "Megaserver lib actualizada")
 
     return modified
+
+check_megaserver_lib()
+
+from megaserver import proxy, Mega
