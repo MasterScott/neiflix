@@ -1,3 +1,5 @@
+#Extraído de la librería de MEGA de richardasaurus
+
 import re
 from Crypto.PublicKey import RSA
 from .errors import ValidationError, RequestError

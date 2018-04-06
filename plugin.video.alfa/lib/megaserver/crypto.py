@@ -1,3 +1,5 @@
+#Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
+
 from Crypto.Cipher import AES
 import json
 import base64

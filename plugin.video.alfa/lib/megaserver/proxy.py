@@ -1,3 +1,5 @@
+#Basado en el código de gschizas
+
 import socket
 import select
 import re

@@ -1,3 +1,5 @@
+#Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
+
 import urllib2
 from Crypto.Cipher import AES
 from Crypto.Util import Counter

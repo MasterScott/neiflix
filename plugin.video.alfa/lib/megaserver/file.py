@@ -1,5 +1,6 @@
-from cursor import Cursor
+#Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
 
+from cursor import Cursor
 
 class File(object):
     def __init__(self, info, file_id, key, file, client, folder_id=None):

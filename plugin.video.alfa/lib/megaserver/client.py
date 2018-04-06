@@ -1,3 +1,5 @@
+#Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
+
 import base64
 import hashlib
 import json
