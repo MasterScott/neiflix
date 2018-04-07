@@ -98,18 +98,18 @@ def mega_login(verbose):
 
             mega_sid = mega.sid
 
-            logger.info("channels.neiflix LOGIN EN MEGA OK!")
+            logger.info("channels.neiflix ¡LOGIN EN MEGA OK!")
 
             if verbose:
                 platformtools.dialog_notification(
-                    "NEIFLIX", "LOGIN EN MEGA OK!")
+                    "NEIFLIX", "¡LOGIN EN MEGA OK!")
 
         else:
-            logger.info("channels.neiflix ERROR AL HACER LOGIN en MEGA!")
+            logger.info("channels.neiflix ¡ERROR AL HACER LOGIN en MEGA!")
 
             if verbose:
                 platformtools.dialog_notification(
-                    "NEIFLIX", "ERROR AL HACER LOGIN EN MEGA!")
+                    "NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
 
     return mega_sid
 
@@ -945,7 +945,7 @@ def check_megaserver_lib():
                       '__init__.py': 'a2f7108c87b38cada3eda18637c6bdb2eb38ac47',
                       'mega.py': '63a74bb21542158d9ecbaac3613b8d2885355a8c',
                       'proxy.py': '64b82005bb66d5fe422591177793428b65a54bbf',
-                      'server.py': '0431d99be5da28874ef371bf8e735fa6be37c5ec'}
+                      'server.py': 'eb8705827e9d3cb97d876f026b4ddef11e2fb54f'}
 
     modified = 0
 
@@ -979,7 +979,7 @@ def check_megaserver_lib():
 
     if modified:
         platformtools.dialog_notification(
-            "NEIFLIX", "Megaserver lib actualizada")
+            "NEIFLIX", "MEGASERVER LIB actualizada")
 
     return modified
 

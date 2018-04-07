@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
 
+import urllib2
 import traceback
 import BaseHTTPServer
 from SocketServer import ThreadingMixIn
@@ -19,6 +20,13 @@ class Server(ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
     def stop(self):
         self.running = False
+        
+        try:
+            urllib2.urlopen('http://%s:%s/' % (self.server_name, self.server_port))
+        except urllib2.URLError:
+            pass
+
+        self.server_close()
 
     def serve(self):
         while self.running:
