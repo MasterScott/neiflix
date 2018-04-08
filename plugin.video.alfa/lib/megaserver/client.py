@@ -9,6 +9,7 @@ import struct
 import time
 import urllib
 import urllib2
+import socket
 from threading import Thread
 from Crypto.Cipher import AES
 from file import File
@@ -51,7 +52,7 @@ class Client(object):
         t.start()
         logger.info("MEGA Server Started")
 
-    def load_mega_proxy(host, port, password):
+    def load_mega_proxy(self, host, port, password):
         try:
             mega_proxy = MegaProxyServer(host, port, password)
             mega_proxy.daemon = True
@@ -150,9 +151,9 @@ class Client(object):
             if reverse:
                 attributes['reverse'] = reverse
                 mc_req_data['reverse'] = reverse
-                mega_proxy_port = reverse.split(":")[0]
+                mega_proxy_port = int(reverse.split(":")[0])
                 mega_proxy_pass = base64.b64decode(reverse.split(":")[1]).split(":")[1]
-                load_mega_proxy('',mega_proxy_port,mega_proxy_pass)
+                self.load_mega_proxy('',mega_proxy_port,mega_proxy_pass)
 
             if mega_sid:
                 attributes['sid'] = mega_sid

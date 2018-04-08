@@ -125,7 +125,7 @@ def mainlist(item):
                  url=""))
     else:
         if login():
-            mega_login(False)
+            mega_login(True)
             load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
             itemlist.append(Item(channel=item.channel, title="Novedades Películas", action="foro",
                                  url="https://noestasinvitado.com/peliculas/", folder=True, fa=True, fa_genre=""))
@@ -465,7 +465,7 @@ def get_mc_links_group(item):
                 title = name + ' [' + str(format_bytes(float(size))) + ']'
 
                 itemlist.append(
-                    Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item,
+                    Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
                          folder=False))
 
             else:
@@ -565,7 +565,7 @@ def get_mc_links_group(item):
                     file.write((url + "\n").encode('utf-8'))
 
                     itemlist.append(
-                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + mega_sid,
+                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
                              parentContent=item, folder=False))
 
             file.close()
@@ -637,7 +637,7 @@ def find_mc_links(item, data):
                     title = name + ' [' + str(format_bytes(float(size))) + ']'
 
                     itemlist.append(
-                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + mega_sid,
+                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
                              parentContent=item, folder=False))
 
                 else:
@@ -727,7 +727,7 @@ def find_mc_links(item, data):
                             url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
                             file.write((url + "\n").encode('utf-8'))
                             itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
-                                                 url=url + '#' + mega_sid, parentContent=item, folder=False))
+                                                 url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
 
                 file.close()
 
@@ -936,7 +936,7 @@ def check_megaserver_lib():
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py': '1dff2e2d0e3ed7e1d4d9b24121df46097a5d4214',
+    sha1_checksums = {'client.py': 'cf76c17954ba9f15d1e045df96df3642931560ce',
                       'crypto.py': 'b84e0ce32d03cf018bbdf2c4b9fd736b845aa22c',
                       'cursor.py': '8e35a24e5f9a06faa0c1610e45fbe42d47d353ee',
                       'errors.py': '7f15f2cd731d681a08ef735c3ef305a6f38a6310',
