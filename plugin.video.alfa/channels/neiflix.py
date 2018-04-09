@@ -452,7 +452,7 @@ def get_mc_links_group(item):
     filename_hash = xbmc.translatePath(
         "special://home/temp/kodi_nei_mc_" + hashlib.sha1(item.channel + item.url + id).hexdigest())
 
-    if os.path.isfile(filename_hash):
+    if os.path.isfile(filename_hash) and os.stat(filename_hash).st_size > 0:
 
         file = open(filename_hash, "r")
 
@@ -468,15 +468,17 @@ def get_mc_links_group(item):
 
                 url_split = url.split('#')
 
-                name = url_split[1]
+                if len(url_split) >= 3:
 
-                size = url_split[2]
+                    name = url_split[1]
 
-                title = name + ' [' + str(format_bytes(float(size))) + ']'
+                    size = url_split[2]
 
-                itemlist.append(
-                    Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
-                         folder=False))
+                    title = name + ' [' + str(format_bytes(float(size))) + ']'
+
+                    itemlist.append(
+                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
+                             folder=False))
 
             else:
 
@@ -512,6 +514,12 @@ def get_mc_links_group(item):
             i += 1
 
         file.close()
+
+        if not itemlist:
+            os.remove(filename_hash)
+            itemlist.append(Item(channel=item.channel,
+                                         title="[COLOR red][B]Ha habido algún error, prueba de nuevo.[/B][/COLOR]",
+                                         action="", url="", folder=False))
 
     else:
 
