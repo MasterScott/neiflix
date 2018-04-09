@@ -20,9 +20,11 @@ from core.item import Item
 from platformcode import config, logger
 from platformcode import platformtools
 
+
+USE_MC_REVERSE = config.get_setting("neiflix_use_mc_reverse", "neiflix")
 MC_REVERSE_DATA = ''
 
-if config.get_setting("neiflix_use_mc_reverse", "neiflix"):
+if USE_MC_REVERSE:
     
     try:
 
@@ -93,34 +95,31 @@ def mega_login(verbose):
 
         if not login_ok:
 
-            mega = Mega()
+			mega = Mega()
 
-            try:
-                mega.login(MEGA_EMAIL, MEGA_PASSWORD)
+			try:
+				mega.login(MEGA_EMAIL, MEGA_PASSWORD)
 
-                pickle.dump(mega, open(filename_hash, "wb"))
+				pickle.dump(mega, open(filename_hash, "wb"))
 
-                login_ok = True
+				login_ok = True
 
-            except RequestError:
-                pass
+				logger.info("channels.neiflix ¡LOGIN EN MEGA OK!")
+
+				if verbose:
+					platformtools.dialog_notification(
+						"NEIFLIX", "¡LOGIN EN MEGA OK!")
+
+			except RequestError:
+				logger.info("channels.neiflix ¡ERROR AL HACER LOGIN en MEGA!")
+
+			if verbose:
+				platformtools.dialog_notification(
+					"NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
 
         if login_ok:
 
             mega_sid = mega.sid
-
-            logger.info("channels.neiflix ¡LOGIN EN MEGA OK!")
-
-            if verbose:
-                platformtools.dialog_notification(
-                    "NEIFLIX", "¡LOGIN EN MEGA OK!")
-
-        else:
-            logger.info("channels.neiflix ¡ERROR AL HACER LOGIN en MEGA!")
-
-            if verbose:
-                platformtools.dialog_notification(
-                    "NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
 
     return mega_sid
 
@@ -444,7 +443,7 @@ def gen_index(item):
 
 
 def get_mc_links_group(item):
-    mega_sid = mega_login(False)
+    mega_sid = mega_login(True)
 
     itemlist = []
 
@@ -544,9 +543,13 @@ def get_mc_links_group(item):
 
                 mc_api_url = url_split[0] + '/api'
 
+                mc_api_req = {'m': 'info', 'link': url}
+
+                if USE_MC_REVERSE:
+                	mc_api_req['reverse']=MC_REVERSE_DATA
+
                 mc_info_res = mc_api_req(
-                    mc_api_url, {
-                        'm': 'info', 'link': url, 'reverse': MC_REVERSE_DATA})
+                    mc_api_url, mc_api_req)
 
                 name = mc_info_res['name'].replace('#', '')
 
@@ -620,7 +623,7 @@ def find_mc_links(item, data):
                 Item(channel=item.channel, action='', title='', url=item.url, mc_group_id=matches[0], folder=True))
     else:
 
-        mega_sid = mega_login(False)
+        mega_sid = mega_login(True)
 
         filename_hash = xbmc.translatePath(
             "special://home/temp/kodi_nei_mc_" + hashlib.sha1(item.channel + item.url).hexdigest())
@@ -709,9 +712,13 @@ def find_mc_links(item, data):
 
                         mc_api_url = url_split[0] + '/api'
 
+                        mc_api_req = {'m': 'info', 'link': url}
+
+                        if USE_MC_REVERSE:
+                			mc_api_req['reverse']=MC_REVERSE_DATA
+
                         mc_info_res = mc_api_req(
-                            mc_api_url, {
-                                'm': 'info', 'link': url, 'reverse': MC_REVERSE_DATA})
+                            mc_api_url, mc_api_req)
 
                         name = mc_info_res['name'].replace('#', '')
 
@@ -814,7 +821,7 @@ def post(url, data):
 
 
 def load_mega_proxy(host, port, password):
-	if MC_REVERSE_DATA:
+	if USE_MC_REVERSE:
 	    try:
 	        mega_proxy = proxy.MegaProxyServer(host, port, password)
 	        mega_proxy.daemon = True
