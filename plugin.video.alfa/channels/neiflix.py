@@ -543,13 +543,13 @@ def get_mc_links_group(item):
 
                 mc_api_url = url_split[0] + '/api'
 
-                mc_api_req = {'m': 'info', 'link': url}
+                mc_api_r = {'m': 'info', 'link': url}
 
                 if USE_MC_REVERSE:
-                	mc_api_req['reverse']=MC_REVERSE_DATA
+                	mc_api_r['reverse']=MC_REVERSE_DATA
 
                 mc_info_res = mc_api_req(
-                    mc_api_url, mc_api_req)
+                    mc_api_url, mc_api_r)
 
                 name = mc_info_res['name'].replace('#', '')
 
@@ -712,13 +712,13 @@ def find_mc_links(item, data):
 
                         mc_api_url = url_split[0] + '/api'
 
-                        mc_api_req = {'m': 'info', 'link': url}
+                        mc_api_r = {'m': 'info', 'link': url}
 
                         if USE_MC_REVERSE:
-                			mc_api_req['reverse']=MC_REVERSE_DATA
+                			mc_api_r['reverse']=MC_REVERSE_DATA
 
                         mc_info_res = mc_api_req(
-                            mc_api_url, mc_api_req)
+                            mc_api_url, mc_api_r)
 
                         name = mc_info_res['name'].replace('#', '')
 
