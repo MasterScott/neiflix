@@ -20,12 +20,23 @@ from core.item import Item
 from platformcode import config, logger
 from platformcode import platformtools
 
-MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
+MC_REVERSE_DATA = ''
 
-MC_REVERSE_PASS = hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
+if config.get_setting("neiflix_use_mc_reverse", "neiflix"):
+    
+    try:
 
-MC_REVERSE_DATA = str(MC_REVERSE_PORT) + ":" + base64.b64encode(
-    "neiflix:" + MC_REVERSE_PASS)
+    	MC_REVERSE_PORT = int(config.get_setting("neiflix_mc_reverse_port", "neiflix"))
+
+    	if MC_REVERSE_PORT >= 1024 and MC_REVERSE_PORT <= 65535:
+
+    		MC_REVERSE_PASS = hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
+
+    		MC_REVERSE_DATA = str(MC_REVERSE_PORT) + ":" + base64.b64encode(
+    			"neiflix:" + MC_REVERSE_PASS)
+
+    except ValueError:
+	   pass
 
 USE_MEGA_PREMIUM = config.get_setting("neiflix_mega_premium", "neiflix")
 
@@ -803,12 +814,13 @@ def post(url, data):
 
 
 def load_mega_proxy(host, port, password):
-    try:
-        mega_proxy = proxy.MegaProxyServer(host, port, password)
-        mega_proxy.daemon = True
-        mega_proxy.start()
-    except socket.error:
-        pass
+	if MC_REVERSE_DATA:
+	    try:
+	        mega_proxy = proxy.MegaProxyServer(host, port, password)
+	        mega_proxy.daemon = True
+	        mega_proxy.start()
+	    except socket.error:
+	        pass
 
 
 def mc_api_req(api_url, req):
