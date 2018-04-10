@@ -4,9 +4,9 @@
   "active": true,
   "adult": true,
   "language": ["cast"],
-  "thumbnail": "neiflix_t.png",
-  "banner" : "neiflix_b.png",
-  "fanart": "neiflix_fart.png",
+  "thumbnail": "neiflix2_t.png",
+  "banner" : "neiflix2_b.png",
+  "fanart": "neiflix2_f.png",
   "categories": [
     "movie",
     "tvshow"
