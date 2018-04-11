@@ -487,7 +487,7 @@ def get_mc_links_group(item):
                 data = scrapertools.cache_page(
                     "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
 
-                patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter.noestasinvitado.com/.+)'
+                patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
 
                 matches = re.compile(patron).findall(data)
 
@@ -526,7 +526,7 @@ def get_mc_links_group(item):
         data = scrapertools.cache_page(
             "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
 
-        patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter.noestasinvitado.com/.+)'
+        patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
 
         matches = re.compile(patron).findall(data)
 
@@ -592,10 +592,23 @@ def get_mc_links_group(item):
 
             file.close()
 
+        else:
+            patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
+
+            matches = re.compile(patron_mega).findall(data)
+
+            if matches:
+
+				for url in matches:
+
+						itemlist.append(Item(channel=item.channel, action="play", server='mega', title=url,
+						    url=url, parentContent=item, folder=False))
+
     return itemlist
 
 
 def find_mc_links(item, data):
+
     msg_id = re.compile('subject_([0-9]+)', re.IGNORECASE).search(data)
 
     if msg_id:
@@ -666,7 +679,7 @@ def find_mc_links(item, data):
 
                     links_hash = line
 
-                    patron = 'https://megacrypter.noestasinvitado.com/[!0-9a-zA-Z_/-]+'
+                    patron = 'https://megacrypter\.noestasinvitado\.com/[!0-9a-zA-Z_/-]+'
 
                     matches = re.compile(patron).findall(data)
 
@@ -695,9 +708,9 @@ def find_mc_links(item, data):
 
             urls = []
 
-            patron = 'https://megacrypter.noestasinvitado.com/[!0-9a-zA-Z_/-]+'
+            patron_mc = 'https://megacrypter\.noestasinvitado\.com/[!0-9a-zA-Z_/-]+'
 
-            matches = re.compile(patron).findall(data)
+            matches = re.compile(patron_mc).findall(data)
 
             if matches:
 
@@ -756,6 +769,23 @@ def find_mc_links(item, data):
                                                  url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
 
                 file.close()
+
+            else:
+            	patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
+
+            	matches = re.compile(patron_mega).findall(data)
+
+            	if matches:
+
+            		for url in matches:
+
+	                    if url not in urls:
+
+	                        urls.append(url)
+	                            
+	                        itemlist.append(Item(channel=item.channel, action="play", server='mega', title=url,
+	                                            url=url, parentContent=item, folder=False))
+
 
     return itemlist
 
@@ -955,9 +985,30 @@ def get_filmaffinity_data(title, year, genre):
             return [None, thumb_url]
 
 
-# NEIFLIX uses a modified version of MEGASERVER LIB that supports
-# Megacrypter links
-def check_megaserver_lib():
+def check_misc_neiflix_files():
+    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/'
+
+    alfa_path = xbmc.translatePath(
+        'special://home/addons/plugin.video.alfa/')
+
+    files = ['resources/media/channels/banner/neiflix2_b.png', 'resources/media/channels/thumb/neiflix2_t.png', 'resources/media/channels/fanart/neiflix2_f.png']
+
+    modified = False
+
+    for filename in files:
+
+        if not os.path.exists(alfa_path + filename):
+
+            urllib.urlretrieve(
+                update_url + filename,
+                alfa_path + filename)
+
+            modified = True
+
+    return modified
+
+# NEIFLIX uses a modified version of MEGA LIB with support for MEGACRYPTER
+def check_mega_lib_integrity():
     update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/lib/megaserver/'
 
     megaserver_lib_path = xbmc.translatePath(
@@ -974,7 +1025,7 @@ def check_megaserver_lib():
                       'proxy.py': '64b82005bb66d5fe422591177793428b65a54bbf',
                       'server.py': 'eb8705827e9d3cb97d876f026b4ddef11e2fb54f'}
 
-    modified = 0
+    modified = False
 
     if not os.path.exists(megaserver_lib_path):
         os.mkdir(megaserver_lib_path)
@@ -987,7 +1038,7 @@ def check_megaserver_lib():
                 update_url + filename,
                 megaserver_lib_path + filename)
 
-            modified = 1
+            modified = True
 
         elif hashlib.sha1(open(megaserver_lib_path + filename, 'rb').read()).hexdigest() != checksum:
 
@@ -1002,14 +1053,14 @@ def check_megaserver_lib():
                 update_url + filename,
                 megaserver_lib_path + filename)
 
-            modified = 1
-
-    if modified:
-        platformtools.dialog_notification(
-            "NEIFLIX", "MEGASERVER LIB actualizada")
+            modified = True
 
     return modified
 
-check_megaserver_lib()
+if check_misc_neiflix_files():
+	platformtools.dialog_notification("NEIFLIX", "Se crearon algunos ficheros")
+
+if check_mega_lib_integrity():
+	platformtools.dialog_notification("NEIFLIX", "Librería de MEGA restaurada")
 
 from megaserver import proxy, Mega
