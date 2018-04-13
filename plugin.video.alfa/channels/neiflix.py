@@ -985,28 +985,6 @@ def get_filmaffinity_data(title, year, genre):
             return [None, thumb_url]
 
 
-def check_misc_neiflix_files():
-    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/'
-
-    alfa_path = xbmc.translatePath(
-        'special://home/addons/plugin.video.alfa/')
-
-    files = ['resources/media/channels/banner/neiflix2_b.png', 'resources/media/channels/thumb/neiflix2_t.png', 'resources/media/channels/fanart/neiflix2_f.png']
-
-    modified = False
-
-    for filename in files:
-
-        if not os.path.exists(alfa_path + filename):
-
-            urllib.urlretrieve(
-                update_url + filename,
-                alfa_path + filename)
-
-            modified = True
-
-    return modified
-
 # NEIFLIX uses a modified version of MEGA LIB with support for MEGACRYPTER
 def check_mega_lib_integrity():
     update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/lib/megaserver/'
@@ -1056,9 +1034,6 @@ def check_mega_lib_integrity():
             modified = True
 
     return modified
-
-if check_misc_neiflix_files():
-	platformtools.dialog_notification("NEIFLIX", "Se crearon algunos ficheros")
 
 if check_mega_lib_integrity():
 	platformtools.dialog_notification("NEIFLIX", "Librería de MEGA restaurada")
