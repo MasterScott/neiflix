@@ -6,6 +6,7 @@ import urlparse
 import urllib
 import urllib2
 import json
+import random
 import math
 import os.path
 import os
@@ -14,7 +15,6 @@ import xbmc
 import base64
 import pickle
 import socket
-
 from core import scrapertools
 from core.item import Item
 from platformcode import config, logger
@@ -601,7 +601,19 @@ def get_mc_links_group(item):
 
 				for url in matches:
 
-						itemlist.append(Item(channel=item.channel, action="play", server='mega', title=url,
+					if len(url.split("!")) == 3:
+						file_id = url.split("!")[1]
+						file_key = url.split("!")[2]
+						file = mega_api_req({'a': 'g', 'g': 1, 'p': file_id})
+						key = crypto.base64_to_a32(file_key)
+						k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
+						attributes = crypto.base64_url_decode(file['at'])
+						attributes = crypto.decrypt_attr(attributes, k)
+						title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
+					else:
+						title=url
+
+					itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
 						    url=url, parentContent=item, folder=False))
 
     return itemlist
@@ -779,12 +791,24 @@ def find_mc_links(item, data):
 
             		for url in matches:
 
-	                    if url not in urls:
+						if url not in urls:
 
-	                        urls.append(url)
-	                            
-	                        itemlist.append(Item(channel=item.channel, action="play", server='mega', title=url,
-	                                            url=url, parentContent=item, folder=False))
+							urls.append(url)
+
+							if len(url.split("!")) == 3:
+								file_id = url.split("!")[1]
+								file_key = url.split("!")[2]
+								file = mega_api_req({'a': 'g', 'g': 1, 'p': file_id})
+								key = crypto.base64_to_a32(file_key)
+								k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
+								attributes = crypto.base64_url_decode(file['at'])
+								attributes = crypto.decrypt_attr(attributes, k)
+								title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
+							else:
+								title=url
+
+							itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
+							url=url, parentContent=item, folder=False))
 
 
     return itemlist
@@ -861,7 +885,7 @@ def post(url, data):
 def load_mega_proxy(host, port, password):
 	if USE_MC_REVERSE:
 	    try:
-	        mega_proxy = proxy.MegaProxyServer(host, port, password)
+	        mega_proxy = MegaProxyServer(host, port, password)
 	        mega_proxy.daemon = True
 	        mega_proxy.start()
 	    except socket.error:
@@ -870,10 +894,14 @@ def load_mega_proxy(host, port, password):
 
 def mc_api_req(api_url, req):
     load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
-
     res = post(api_url, json.dumps(req))
-
     return json.loads(res)
+
+
+def mega_api_req(req, get=""):
+    seqno = random.randint(0, 0xFFFFFFFF)
+    url = 'https://g.api.mega.co.nz/cs?id=%d%s' % (seqno, get)
+    return json.loads(post(url, json.dumps([req])))[0]
 
 
 def format_bytes(bytes, precision=2):
@@ -992,16 +1020,15 @@ def check_mega_lib_integrity():
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py': 'cf76c17954ba9f15d1e045df96df3642931560ce',
-                      'crypto.py': 'b84e0ce32d03cf018bbdf2c4b9fd736b845aa22c',
-                      'cursor.py': '8e35a24e5f9a06faa0c1610e45fbe42d47d353ee',
-                      'errors.py': '7f15f2cd731d681a08ef735c3ef305a6f38a6310',
-                      'file.py': 'b8f15904b43413256453b405ad266dd7fdad0136',
-                      'handler.py': '822fd9fb281751451f87aeb7a1f90b8cac1e391c',
-                      '__init__.py': 'a2f7108c87b38cada3eda18637c6bdb2eb38ac47',
-                      'mega.py': '63a74bb21542158d9ecbaac3613b8d2885355a8c',
-                      'proxy.py': '64b82005bb66d5fe422591177793428b65a54bbf',
-                      'server.py': 'eb8705827e9d3cb97d876f026b4ddef11e2fb54f'}
+    sha1_checksums = {'client.py': '6838f2a3d02574295a23a36762865291c5b1af9e',
+                      'crypto.py': '776b58c5342a9dc638d9842147cf34246a4ff2be',
+                      'cursor.py': '961b8c7b80cee3b5f14acd39d65730f6e296eb7e',
+                      'file.py': 'e1f32e7431824b1e4356b12a7e0885a2c32faae8',
+                      'handler.py': 'f00fe887ed1169ae30cd3916e493eccdd2bc962d',
+                      '__init__.py': 'c3f15571b364f0a71b1afde8947563fd5d2ed77f',
+                      'mega.py': '40361a8038b7b18ed29d146798f12198c49ca6ed',
+                      'proxy.py': 'ef5ecbbe85b5176558ed82a34fafa9d84f7daf95',
+                      'server.py': '04d5fe83bf17a1051746a108a245b33fda022c96'}
 
     modified = False
 
@@ -1038,4 +1065,4 @@ def check_mega_lib_integrity():
 if check_mega_lib_integrity():
 	platformtools.dialog_notification("NEIFLIX", "Librería de MEGA restaurada")
 
-from megaserver import proxy, Mega
+from megaserver import Mega, MegaProxyServer, crypto
