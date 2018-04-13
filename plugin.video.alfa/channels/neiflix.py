@@ -113,9 +113,9 @@ def mega_login(verbose):
 			except RequestError:
 				logger.info("channels.neiflix ¡ERROR AL HACER LOGIN en MEGA!")
 
-			if verbose:
-				platformtools.dialog_notification(
-					"NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
+				if verbose:
+					platformtools.dialog_notification(
+						"NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
 
         if login_ok:
 
