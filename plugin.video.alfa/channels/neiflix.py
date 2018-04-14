@@ -108,22 +108,30 @@ def mega_login(verbose):
 
 				login_ok = True
 
-				logger.info("channels.neiflix ¡LOGIN EN MEGA OK!")
-
-				if verbose:
-					platformtools.dialog_notification(
-						"NEIFLIX", "¡LOGIN EN MEGA OK!")
-
 			except RequestError:
-				logger.info("channels.neiflix ¡ERROR AL HACER LOGIN en MEGA!")
-
-				if verbose:
-					platformtools.dialog_notification(
-						"NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
+				pass
 
         if login_ok:
 
-            mega_sid = mega.sid
+        	storage = mega.get_storage_space()
+
+        	account_type = '**PREMIUM**' if storage['total'] >= 214748364800 else ''
+
+        	mega_sid = mega.sid
+
+        	logger.info("channels.neiflix ¡LOGIN EN MEGA OK! "+account_type)
+
+        	if verbose:
+
+        		platformtools.dialog_notification(
+				"NEIFLIX", "¡LOGIN EN MEGA OK! "+account_type)
+
+        	else:
+
+        		logger.info("channels.neiflix ¡ERROR AL HACER LOGIN EN MEGA!")
+
+        		if verbose:
+        			platformtools.dialog_notification("NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
 
     return mega_sid
 
@@ -447,7 +455,7 @@ def gen_index(item):
 
 
 def get_mc_links_group(item):
-    mega_sid = mega_login(True)
+    mega_sid = mega_login(False)
 
     itemlist = []
 
@@ -660,7 +668,7 @@ def find_mc_links(item, data):
                 Item(channel=item.channel, action='', title='', url=item.url, mc_group_id=matches[0], folder=True))
     else:
 
-        mega_sid = mega_login(True)
+        mega_sid = mega_login(False)
 
         filename_hash = xbmc.translatePath(
             "special://home/temp/kodi_nei_mc_" + hashlib.sha1(item.channel + item.url).hexdigest())
