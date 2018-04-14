@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
+#Basado en la librería de MEGA que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
 
 import base64
 import hashlib
@@ -10,8 +10,8 @@ import time
 import urllib
 import urllib2
 import socket
+from .crypto import *
 from threading import Thread
-from Crypto.Cipher import AES
 from file import File
 from handler import Handler
 from server import Server
@@ -119,7 +119,7 @@ class Client(object):
             url = url_split[0]
             name = url_split[1]
             size = int(url_split[2])
-            key = self.base64_to_a32(url_split[3])
+            key = base64_to_a32(url_split[3])
 
             if len(url_split) > 4:
                 noexpire = url_split[4]
@@ -169,83 +169,44 @@ class Client(object):
                 if len(url.split("!")) == 3:
                     folder_id = url.split("!")[1]
                     folder_key = url.split("!")[2]
-                    master_key = self.base64_to_a32(folder_key)
-                    files = self.api_req({"a": "f", "c": 1}, "&n=" + folder_id)
+                    master_key = base64_to_a32(folder_key)
+                    files = self.mega_api_req({"a": "f", "c": 1}, "&n=" + folder_id)
                     for file in files["f"]:
                         if file["t"] == 0:
                             key = file['k'][file['k'].index(':') + 1:]
-                            key = self.decrypt_key(self.base64_to_a32(key), master_key)
+                            key = decrypt_key(base64_to_a32(key), master_key)
                             k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
-                            attributes = self.base64urldecode(file['a'])
-                            attributes = self.dec_attr(attributes, k)
+                            attributes = base64_url_decode(file['a'])
+                            attributes = decrypt_attr(attributes, k)
                             self.files.append(
                                 File(info=attributes, file_id=file["h"], key=key, folder_id=folder_id, file=file,
                                      client=self))
                 else:
-                    raise Exception("Enlace no valido")
+                    raise Exception("Enlace no válido")
 
             elif url.startswith("!") or url.startswith("N!"):
                 if len(url.split("!")) == 3:
                     file_id = url.split("!")[1]
                     file_key = url.split("!")[2]
-                    file = self.api_req({'a': 'g', 'g': 1, 'p': file_id})
-                    key = self.base64_to_a32(file_key)
+                    file = self.mega_api_req({'a': 'g', 'g': 1, 'p': file_id})
+                    key = base64_to_a32(file_key)
                     k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
-                    attributes = self.base64urldecode(file['at'])
-                    attributes = self.dec_attr(attributes, k)
+                    attributes = base64_url_decode(file['at'])
+                    attributes = decrypt_attr(attributes, k)
                     self.files.append(File(info=attributes, file_id=file_id, key=key, file=file, client=self))
                 else:
-                    raise Exception("Enlace no valido")
+                    raise Exception("Enlace no válido")
             else:
-                raise Exception("Enlace no valido")
+                raise Exception("Enlace no válido")
 
-    def api_req(self, req, get=""):
+    def mega_api_req(self, req, get=""):
         seqno = random.randint(0, 0xFFFFFFFF)
         url = 'https://g.api.mega.co.nz/cs?id=%d%s' % (seqno, get)
         return json.loads(self.post(url, json.dumps([req])))[0]
 
     def mc_api_req(self, api_url, req):
-
         res = self.post(api_url, json.dumps(req))
-
         return json.loads(res)
-
-    def base64urldecode(self, data):
-        data += '=='[(2 - len(data) * 3) % 4:]
-        for search, replace in (('-', '+'), ('_', '/'), (',', '')):
-            data = data.replace(search, replace)
-        return base64.b64decode(data)
-
-    def base64urlencode(self, data):
-        data = base64.b64encode(data)
-        for search, replace in (('+', '-'), ('/', '_'), ('=', '')):
-            data = data.replace(search, replace)
-        return data
-
-    def a32_to_str(self, a):
-        return struct.pack('>%dI' % len(a), *a)
-
-    def str_to_a32(self, b):
-        if len(b) % 4:  # Add padding, we need a string with a length multiple of 4
-            b += '\0' * (4 - len(b) % 4)
-        return struct.unpack('>%dI' % (len(b) / 4), b)
-
-    def base64_to_a32(self, s):
-        return self.str_to_a32(self.base64urldecode(s))
-
-    def a32_to_base64(self, a):
-        return self.base64urlencode(self.a32_to_str(a))
-
-    def aes_cbc_decrypt(self, data, key):
-        decryptor = AES.new(key, AES.MODE_CBC, '\0' * 16)
-        # decryptor = aes.AESModeOfOperationCBC(key, iv='\0' * 16)
-        return decryptor.decrypt(data)
-
-    def aes_cbc_decrypt_a32(self, data, key):
-        return self.str_to_a32(self.aes_cbc_decrypt(self.a32_to_str(data), self.a32_to_str(key)))
-
-    def decrypt_key(self, a, key):
-        return sum((self.aes_cbc_decrypt_a32(a[i:i + 4], key) for i in xrange(0, len(a), 4)), ())
 
     def post(self, url, data):
         import ssl
@@ -268,7 +229,3 @@ class Client(object):
         contents = urllib2.urlopen(request).read()
 
         return contents
-
-    def dec_attr(self, attr, key):
-        attr = self.aes_cbc_decrypt(attr, self.a32_to_str(key)).rstrip('\0')
-        return json.loads(attr[4:]) if attr[:6] == 'MEGA{"' else False

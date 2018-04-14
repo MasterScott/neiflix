@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
+#Extraído de la librería de MEGA de richardasaurus
 
 from Crypto.Cipher import AES
 import json
@@ -56,9 +56,7 @@ def encrypt_key(a, key):
 
 
 def decrypt_key(a, key):
-    return sum(
-        (aes_cbc_decrypt_a32(a[i:i + 4], key)
-         for i in range(0, len(a), 4)), ())
+    return sum((aes_cbc_decrypt_a32(a[i:i + 4], key) for i in xrange(0, len(a), 4)), ())
 
 
 def encrypt_attr(attr, key):

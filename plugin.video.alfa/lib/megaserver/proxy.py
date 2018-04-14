@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Basado en el código de gschizas
+#Basado en el código de gschizas y modificado por tonikelope para NEIFLIX
 
 import socket
 import select
@@ -10,8 +10,7 @@ from threading import Thread
 from threading import Lock
 from platformcode import config, logger
 
-# Changing the BUFFER_SIZE and delay, you can improve the speed and bandwidth.
-# But when buffer get to high or delay go too down, you can broke things
+
 BUFFER_SIZE = 4096
 MAX_LISTEN = 10
 CONNECT_PATTERN = "CONNECT (.*mega(?:\.co)?\.nz):(443) HTTP/(1\.[01])"

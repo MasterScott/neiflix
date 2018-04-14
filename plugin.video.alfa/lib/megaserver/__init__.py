@@ -3,6 +3,7 @@
 
 from client import Client
 from server import Server
-from mega import Mega
+from mega import Mega, RequestError
+from proxy import MegaProxyServer
 
-__all__ = ['Client', 'Server', 'Mega']
+__all__ = ['Client', 'Server', 'Mega', 'MegaProxyServer', 'RequestError']

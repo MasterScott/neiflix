@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Basado en la librería de MEGA para pelisalacarte que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
+#Basado en la librería de MEGA que programó divadr y modificado por tonikelope para dar soporte a MEGACRYPTER
 
 import BaseHTTPServer
 import urlparse
