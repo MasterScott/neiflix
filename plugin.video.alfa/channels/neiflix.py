@@ -22,7 +22,6 @@ from platformcode import platformtools
 
 
 USE_MC_REVERSE = config.get_setting("neiflix_use_mc_reverse", "neiflix")
-MC_REVERSE_DATA = ''
 
 if USE_MC_REVERSE:
     
@@ -39,6 +38,11 @@ if USE_MC_REVERSE:
 
     except ValueError:
 	   pass
+
+else:
+    MC_REVERSE_DATA = ''
+    MC_REVERSE_PORT = None
+    MC_REVERSE_PASS = None
 
 USE_MEGA_PREMIUM = config.get_setting("neiflix_mega_premium", "neiflix")
 
