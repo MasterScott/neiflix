@@ -115,23 +115,25 @@ def mega_login(verbose):
 
         	storage = mega.get_storage_space()
 
-        	account_type = '**PREMIUM**' if storage['total'] >= 214748364800 else ''
+        	premium = storage['total'] >= 214748364800
 
         	mega_sid = mega.sid
 
-        	logger.info("channels.neiflix ¡LOGIN EN MEGA OK! "+account_type)
+        	logger.info("channels.neiflix ¡LOGIN EN MEGA OK!")
 
         	if verbose:
+        		platformtools.dialog_notification("NEIFLIX", "¡LOGIN EN MEGA OK!")
 
-        		platformtools.dialog_notification(
-				"NEIFLIX", "¡LOGIN EN MEGA OK! "+account_type)
+        	if not premium:
+        		logger.info("channels.neiflix AVISO: CUENTA DE MEGA NO PREMIUM!")
+        		platformtools.dialog_notification("NEIFLIX", "AVISO: CUENTA DE MEGA NO PREMIUM!")
 
-        	else:
+        else:
 
-        		logger.info("channels.neiflix ¡ERROR AL HACER LOGIN EN MEGA!")
+    		logger.info("channels.neiflix ¡ERROR AL HACER LOGIN EN MEGA!")
 
-        		if verbose:
-        			platformtools.dialog_notification("NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
+    		if verbose:
+    			platformtools.dialog_notification("NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
 
     return mega_sid
 
