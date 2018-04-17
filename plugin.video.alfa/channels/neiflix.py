@@ -213,7 +213,7 @@ def foro(item):
 
             if uploader not in UPLOADERS_BLACKLIST:
 
-                url = urlparse.urljoin(item.url, scrapedurl)
+                url = urlparse.urljoin(item.url, scrapedurl)+"?sort=first_post;desc"
 
                 scrapedtitle = scrapertools.htmlclean(scrapedtitle)
 
