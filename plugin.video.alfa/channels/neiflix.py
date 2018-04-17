@@ -213,7 +213,7 @@ def foro(item):
 
             if uploader not in UPLOADERS_BLACKLIST:
 
-                url = urlparse.urljoin(item.url, scrapedurl)+"?sort=first_post;desc"
+                url = urlparse.urljoin(item.url, scrapedurl)
 
                 scrapedtitle = scrapertools.htmlclean(scrapedtitle)
 
@@ -270,6 +270,7 @@ def foro(item):
                 else:
                     item.parent_title = title.strip()
                     content_title = ""
+                    url=url+"?sort=first_post;desc"
 
                 itemlist.append(item.clone(
                     action=action,
@@ -280,22 +281,22 @@ def foro(item):
                     "Chrome/65.0.3163.100 Safari/537.36",
                     folder=True, contentTitle=content_title))
 
-        patron = '<div class="pagelinks">Páginas:.*?\[<strong>[^<]+</strong>\].*?<a class="navPages" href' \
-                 '="(?!\#bot)([^"]+)">[^<]+</a>.*?</div>'
-        matches = re.compile(patron, re.DOTALL).findall(data)
-        for match in matches:
-            if len(matches) > 0:
-                url = match
-                title = "[B]>> Página Siguiente[/B]"
-                thumbnail = ""
-                plot = ""
-                itemlist.append(
-                    item.clone(
-                        action="foro",
-                        title=title,
-                        url=url,
-                        thumbnail=thumbnail,
-                        folder=True))
+        patron = '\[<strong>[0-9]+</strong>\][^<>]*<a class="navPages" href="([^"]+)">'
+
+        matches = re.compile(patron, re.DOTALL).search(data)
+
+        if matches:
+            url = matches.group(1)
+            title = "[B]>> Página Siguiente[/B]"
+            thumbnail = ""
+            plot = ""
+            itemlist.append(
+                item.clone(
+                    action="foro",
+                    title=title,
+                    url=url,
+                    thumbnail=thumbnail,
+                    folder=True))
 
     return itemlist
 
