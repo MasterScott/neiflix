@@ -270,7 +270,11 @@ def foro(item):
                 else:
                     item.parent_title = title.strip()
                     content_title = ""
-                    url=url+"?sort=first_post;desc"
+                    matches = re.compile("([^/]+)/$", re.DOTALL).search(url)
+
+                    if matches.group(1) not in ('hd-espanol-59','hd-v-o-v-o-s-61','hd-animacion-62',
+                    	'sd-espanol-53','sd-v-o-v-o-s-54','sd-animacion','seriesovas-anime-espanol','seriesovas-anime-v-o-v-o-s'):
+                    	url=url+"?sort=first_post;desc"
 
                 itemlist.append(item.clone(
                     action=action,
