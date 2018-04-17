@@ -119,21 +119,21 @@ def mega_login(verbose):
 
         	mega_sid = mega.sid
 
-        	logger.info("channels.neiflix ¡LOGIN EN MEGA OK!")
+        	logger.info("channels.neiflix LOGIN EN MEGA OK")
 
         	if verbose:
-        		platformtools.dialog_notification("NEIFLIX", "¡LOGIN EN MEGA OK!")
+        		platformtools.dialog_notification("NEIFLIX", "LOGIN EN MEGA OK")
 
         	if not premium:
-        		logger.info("channels.neiflix AVISO: CUENTA DE MEGA NO PREMIUM!")
-        		platformtools.dialog_notification("NEIFLIX", "AVISO: CUENTA DE MEGA NO PREMIUM!")
+        		logger.info("channels.neiflix AVISO: CUENTA DE MEGA NO PREMIUM")
+        		platformtools.dialog_notification("NEIFLIX", "AVISO: CUENTA DE MEGA NO PREMIUM")
 
         else:
 
-    		logger.info("channels.neiflix ¡ERROR AL HACER LOGIN EN MEGA!")
+    		logger.info("channels.neiflix ERROR AL HACER LOGIN EN MEGA")
 
     		if verbose:
-    			platformtools.dialog_notification("NEIFLIX", "¡ERROR AL HACER LOGIN EN MEGA!")
+    			platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN MEGA")
 
     return mega_sid
 
@@ -144,11 +144,13 @@ def mainlist(item):
     itemlist = []
 
     if config.get_setting("neiflixuser", "neiflix") == "":
+        platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN NEI")
         itemlist.append(
-            Item(channel=item.channel, title="Habilita tu cuenta en la configuración...", action="settingCanal",
+            Item(channel=item.channel, title="[COLOR red][B]Habilita tu cuenta en la configuración.[/B][/COLOR]", action="settingCanal",
                  url=""))
     else:
         if login():
+            platformtools.dialog_notification("NEIFLIX", "¡Bienvenido " + config.get_setting("neiflix_user", "neiflix")+"!")
             mega_login(True)
             load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
             itemlist.append(Item(channel=item.channel, title="Novedades Películas", action="foro",
@@ -171,8 +173,9 @@ def mainlist(item):
                     title="[COLOR yellow][B]Buscar...[/B][/COLOR]",
                     action="search"))
         else:
+            platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN NEI")
             itemlist.append(
-                Item(channel=item.channel, title="Usuario y/o password de NEI incorrecta, revisa la configuración...",
+                Item(channel=item.channel, title="[COLOR red][B]ERROR: Usuario y/o password de NOESTASINVITADO.COM incorrectos (revisa la configuración).[/B][/COLOR]",
                      action="", url="", folder=False))
     return itemlist
 
