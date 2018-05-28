@@ -1042,15 +1042,16 @@ def check_mega_lib_integrity():
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
 
-    sha1_checksums = {'client.py': '6838f2a3d02574295a23a36762865291c5b1af9e',
-                      'crypto.py': '80f8e0d66de1be2813b9679e4cfa0e15c3fbfe45',
-                      'cursor.py': '961b8c7b80cee3b5f14acd39d65730f6e296eb7e',
-                      'file.py': 'e1f32e7431824b1e4356b12a7e0885a2c32faae8',
-                      'handler.py': 'f00fe887ed1169ae30cd3916e493eccdd2bc962d',
-                      '__init__.py': 'c5f96b17e0ad949616eab3c1296bc2fffd82fa48',
-                      'mega.py': '40361a8038b7b18ed29d146798f12198c49ca6ed',
-                      'proxy.py': 'ef5ecbbe85b5176558ed82a34fafa9d84f7daf95',
-                      'server.py': '04d5fe83bf17a1051746a108a245b33fda022c96'}
+    urllib.urlretrieve(update_url + 'checksum.sha1', megaserver_lib_path + 'checksum.sha1')
+
+    sha1_checksums = {}
+
+    with open(megaserver_lib_path + 'checksum.sha1') as f:
+        for line in f:
+            strip_line = line.strip()
+            if strip_line:
+                parts = re.split(' +', line.strip())
+                sha1_checksums[parts[1]]=parts[0]
 
     modified = False
 
