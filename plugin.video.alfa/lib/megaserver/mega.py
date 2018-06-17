@@ -2,11 +2,24 @@
 #Extraído de la librería de MEGA de richardasaurus
 
 import re
-from Crypto.PublicKey import RSA
 from .crypto import *
 import json
 import urllib
 import urllib2
+try:
+    from Crypto.PublicKey import RSA
+except ImportError:
+    from Cryptodome.PublicKey import RSA
+
+
+def rsa_mega_decrypt(self, ciphertext):
+    if not 0 < ciphertext < self._n:
+        raise ValueError("Ciphertext too large")
+    if not self.has_private():
+        raise TypeError("This is not a private key")
+
+    return pow(Integer(ciphertext), self._d, self._n)
+
 
 class RequestError(Exception):
     pass
@@ -81,12 +94,27 @@ class Mega(object):
                 private_key = private_key[offset:]
 
             encrypted_sid = mpi_to_int(base64_url_decode(resp['csid']))
-            rsa_decrypter = RSA.construct(
-                (self.rsa_private_key[0] * self.rsa_private_key[1],
-                 0L, self.rsa_private_key[2], self.rsa_private_key[0],
-                 self.rsa_private_key[1]))
+            
+            try:
+                #Pycrypto
+                rsa_decrypter = RSA.construct(
+                    (self.rsa_private_key[0] * self.rsa_private_key[1],
+                     0L, self.rsa_private_key[2], self.rsa_private_key[0],
+                     self.rsa_private_key[1]))
 
-            sid = '%x' % rsa_decrypter.key._decrypt(encrypted_sid)
+                sid = '%x' % rsa_decrypter.key._decrypt(encrypted_sid)
+            except ValueError:
+                #Pycryptodome
+                rsa_decrypter = RSA.construct(
+                    (self.rsa_private_key[0] * self.rsa_private_key[1],
+                     0L, self.rsa_private_key[2], self.rsa_private_key[0],
+                     self.rsa_private_key[1]), consistency_check=False)
+
+                from Crypto.Math.Numbers import Integer
+
+                rsa_decrypter.rsa_mega_decrypt = rsa_mega_decrypt.__get__(rsa_decrypter)
+                sid = '%x' % rsa_decrypter.rsa_mega_decrypt(encrypted_sid)
+
             sid = binascii.unhexlify('0' + sid if len(sid) % 2 else sid)
             self.sid = base64_url_encode(sid[:43])
 

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 #Extraído de la librería de MEGA de richardasaurus
 
-from Crypto.Cipher import AES
 import json
 import base64
 import struct
 import binascii
 import random
+try:
+    from Crypto.Cipher import AES
+except ImportError:
+    from Cryptodome.Cipher import AES
 
 
 def aes_cbc_encrypt(data, key):

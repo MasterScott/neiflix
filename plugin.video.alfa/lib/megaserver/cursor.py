@@ -3,7 +3,10 @@
 
 import urllib2
 from .crypto import *
-from Crypto.Util import Counter
+try:
+    from Crypto.Util import Counter
+except ImportError:
+    from Cryptodome.Util import Counter
 
 
 class Cursor(object):

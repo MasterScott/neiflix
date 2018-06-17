@@ -1,9 +1,9 @@
 6838f2a3d02574295a23a36762865291c5b1af9e  client.py
-80f8e0d66de1be2813b9679e4cfa0e15c3fbfe45  crypto.py
-961b8c7b80cee3b5f14acd39d65730f6e296eb7e  cursor.py
+29dd181329d0aee05e10bfffc5ca76de311cbc9b  crypto.py
+7b7cb16c5733a2acb67275f90e6ccf553ec8bfd5  cursor.py
 e1f32e7431824b1e4356b12a7e0885a2c32faae8  file.py
 f00fe887ed1169ae30cd3916e493eccdd2bc962d  handler.py
 c5f96b17e0ad949616eab3c1296bc2fffd82fa48  __init__.py
-40361a8038b7b18ed29d146798f12198c49ca6ed  mega.py
+5bdc81b0d8726a01f9e1f89654921c7beaef6688  mega.py
 ef5ecbbe85b5176558ed82a34fafa9d84f7daf95  proxy.py
 04d5fe83bf17a1051746a108a245b33fda022c96  server.py
