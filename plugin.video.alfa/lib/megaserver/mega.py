@@ -13,6 +13,8 @@ except ImportError:
 
 
 def rsa_mega_decrypt(self, ciphertext):
+    from Crypto.Math.Numbers import Integer
+    
     if not 0 < ciphertext < self._n:
         raise ValueError("Ciphertext too large")
     if not self.has_private():
@@ -109,8 +111,6 @@ class Mega(object):
                     (self.rsa_private_key[0] * self.rsa_private_key[1],
                      0L, self.rsa_private_key[2], self.rsa_private_key[0],
                      self.rsa_private_key[1]), consistency_check=False)
-
-                from Crypto.Math.Numbers import Integer
 
                 rsa_decrypter.rsa_mega_decrypt = rsa_mega_decrypt.__get__(rsa_decrypter)
                 sid = '%x' % rsa_decrypter.rsa_mega_decrypt(encrypted_sid)
