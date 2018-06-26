@@ -21,6 +21,7 @@ from platformcode import config, logger
 from platformcode import platformtools
 
 
+CHECK_MEGA_LIB = True
 USE_MC_REVERSE = config.get_setting("neiflix_use_mc_reverse", "neiflix")
 
 if USE_MC_REVERSE:
@@ -1085,7 +1086,7 @@ def check_mega_lib_integrity():
 
     return modified
 
-if check_mega_lib_integrity():
+if CHECK_MEGA_LIB and check_mega_lib_integrity():
 	platformtools.dialog_notification("NEIFLIX", "Librería de MEGA restaurada")
 
 from megaserver import Mega, MegaProxyServer, RequestError, crypto
