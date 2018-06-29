@@ -25,6 +25,8 @@ class ChunkDownloader():
 
 		print("ChunkDownloader [%d] HELLO!" % self.id)
 
+		time.sleep((self.id - 1)*0.5)
+
 		error = False
 
 		error509 = False
@@ -60,7 +62,7 @@ class ChunkDownloader():
 
 					error = False
 
-					error509 = True
+					error509 = False
 
 					if offset >= 0:
 
@@ -117,6 +119,8 @@ class ChunkDownloader():
 										time.sleep(5)
 									
 									self.url = self.chunk_writer.cursor._file.url
+								elif connection.getcode() == 503:
+									time.sleep(1)
 
 						except Exception as e:
 							print(str(e))
