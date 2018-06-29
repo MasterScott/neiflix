@@ -3,7 +3,7 @@ ec71b67efdac6c792a7c46432ab7079d3c72adcd  ChunkDownloader.py
 e18b1926ca62b702460804950c07491d5c7087a5  ChunkWriter.py
 6838f2a3d02574295a23a36762865291c5b1af9e  client.py
 29dd181329d0aee05e10bfffc5ca76de311cbc9b  crypto.py
-86aef54f58b4dcd3ce28027aa5e53d75491e54a6  cursor.py
+8235f7952fccb2e03dcc4d03e399e11b29b25bd6  cursor.py
 03bb051282a89e2ebeba65c4763e730f8760ed3c  file.py
 f00fe887ed1169ae30cd3916e493eccdd2bc962d  handler.py
 c5f96b17e0ad949616eab3c1296bc2fffd82fa48  __init__.py
