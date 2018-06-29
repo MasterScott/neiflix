@@ -5,6 +5,7 @@ import threading
 import Chunk
 import ChunkDownloader
 import ChunkWriter
+import time
 import os
 import urllib2
 from .crypto import *
@@ -13,7 +14,7 @@ try:
 except ImportError:
     from Cryptodome.Util import Counter
 
-MAX_CHUNK_WORKERS = 4
+MAX_CHUNK_WORKERS = 8
 
 class Cursor(object):
     def __init__(self, file):
@@ -23,13 +24,14 @@ class Cursor(object):
         self.pipe_w=None
         self.chunk_writer=None
         self.chunk_downloaders=[]
+        self.turbo_lock=threading.Lock()
         self.initial_value = file.initial_value
         self.k = file.k
 
 
-    def mega_request(self, offset, retry=False):
-        if not self._file.url or retry:
-            self._file.url = self.get_new_url_from_api()
+    def mega_request(self, offset):
+        if not self._file.url:
+            self._file.refreshMegaDownloadUrl()
 
         try:
             self.start_multi_download(offset)
@@ -37,36 +39,11 @@ class Cursor(object):
         except Exception:
             self.stop_multi_download()
 
-
-    def get_new_url_from_api():
-        if self._file.folder_id:
-            file = self._file._client.api_req({"a": "g", "g": 1, "n": self._file.file_id}, "&n=" + self._file.folder_id)
-            return file["g"]
-        elif self._file.file_id != -1:
-            file = self._file._client.api_req({'a': 'g', 'g': 1, 'p': self._file.file_id})
-            return file["g"]
-        else:
-            mc_req_data = {'m': 'dl', 'link': self._file.info['mc_link']}
-
-            if 'noexpire' in self._file.info:
-                mc_req_data['noexpire'] = self._file.info['noexpire']
-
-            if 'reverse' in self._file.info:
-                mc_req_data['reverse'] = self._file.info['reverse']
-
-            if 'sid' in self._file.info:
-                mc_req_data['sid'] = self._file.info['sid']
-
-            mc_dl_res=self._file._client.mc_api_req(self._file.info['mc_api_url'], mc_req_data)
-
-            return mc_dl_res['url']
-
-
     def start_multi_download(self, offset):
 
         self.pipe_r,self.pipe_w=os.pipe()
 
-        self.chunk_writer = ChunkWriter.ChunkWriter(self, self.pipe_w, self._file.url, offset, self._file.size - 1)
+        self.chunk_writer = ChunkWriter.ChunkWriter(self, self.pipe_w, offset, self._file.size - 1)
 
         t = threading.Thread(target=self.chunk_writer.run)
         t.daemon = True
@@ -80,6 +57,26 @@ class Cursor(object):
             t = threading.Thread(target=chunk_downloader.run)
             t.daemon = True
             t.start()
+            time.sleep(1)
+
+
+    def workers_turbo(self, workers):
+
+        self.turbo_lock.acquire()
+
+        current_workers = len(self.chunk_downloaders)
+
+        if not self.chunk_writer.exit and current_workers > 0 and current_workers < workers:
+
+            for c in range(current_workers, workers):
+                chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
+                self.chunk_downloaders.append(chunk_downloader)
+                t = threading.Thread(target=chunk_downloader.run)
+                t.daemon = True
+                t.start()
+                time.sleep(1)
+
+        self.turbo_lock.release()
 
 
     def stop_multi_download(self):
@@ -107,6 +104,8 @@ class Cursor(object):
             except Exception as e:
                 print(str(e))
 
+        self.chunk_downloaders = []
+
 
     def read(self, n=None):
         if not self.pipe_r:
@@ -115,6 +114,7 @@ class Cursor(object):
         try:    
             res = os.read(self.pipe_r, n)
         except Exception:
+            res = None
             pass
 
         if res:
