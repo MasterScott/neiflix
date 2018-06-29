@@ -8,6 +8,7 @@ import ChunkWriter
 import time
 import os
 import urllib2
+from platformcode import platformtools
 from .crypto import *
 try:
     from Crypto.Util import Counter
@@ -73,6 +74,8 @@ class Cursor(object):
 	                t = threading.Thread(target=chunk_downloader.run)
 	                t.daemon = True
 	                t.start()
+
+                platformtools.dialog_notification("NEIFLIX", "MEGA PROXY (TURBO) MODE ENABLED")
 
 	        self.turbo_lock.release()
 
