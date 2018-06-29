@@ -57,7 +57,6 @@ class Cursor(object):
             t = threading.Thread(target=chunk_downloader.run)
             t.daemon = True
             t.start()
-            time.sleep(1)
 
 
     def workers_turbo(self, workers):
