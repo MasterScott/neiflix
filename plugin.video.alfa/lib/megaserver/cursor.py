@@ -61,20 +61,20 @@ class Cursor(object):
 
     def workers_turbo(self, workers):
 
-        self.turbo_lock.acquire()
+        if self.turbo_lock.acquire(False):
 
-        current_workers = len(self.chunk_downloaders)
+	        current_workers = len(self.chunk_downloaders)
 
-        if not self.chunk_writer.exit and current_workers > 0 and current_workers < workers:
+	        if not self.chunk_writer.exit and current_workers > 0 and current_workers < workers:
 
-            for c in range(current_workers, workers):
-                chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
-                self.chunk_downloaders.append(chunk_downloader)
-                t = threading.Thread(target=chunk_downloader.run)
-                t.daemon = True
-                t.start()
+	            for c in range(current_workers, workers):
+	                chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
+	                self.chunk_downloaders.append(chunk_downloader)
+	                t = threading.Thread(target=chunk_downloader.run)
+	                t.daemon = True
+	                t.start()
 
-        self.turbo_lock.release()
+	        self.turbo_lock.release()
 
 
     def stop_multi_download(self):
