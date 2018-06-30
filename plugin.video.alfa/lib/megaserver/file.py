@@ -69,9 +69,12 @@ class File(object):
 
 				connection = urllib2.urlopen(req)
 
+				connection.read()
+
 				print("MEGA DL URL IS OK!")
 				return True
 			except urllib2.HTTPError as err:
+				print("CHECKING MEGA DL URL ERROR %d" % err.code)
 				if err.code == 509:
 					error509 = True
 				else:
