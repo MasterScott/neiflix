@@ -83,7 +83,8 @@ class File(object):
                 else:
                     error = True
             except urllib2.socket.timeout:
-                error = True
+            	if not proxy:
+            		error = True
 
 
     def refreshMegaDownloadUrl(self, cv_new_url=None):
