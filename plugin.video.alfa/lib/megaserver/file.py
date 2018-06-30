@@ -42,43 +42,43 @@ class File(object):
 
     def checkMegaDownloadUrl(self, url):
 
-		print("Checking MEGA DL URL %s" % url)
+        print("Checking MEGA DL URL %s" % url)
 
-		error509 = False
+        error509 = False
 
-		proxy = None
+        proxy = None
 
         error = False
 
-		while not error:
+        while not error:
 
-			if error509:
-				if proxy:
-					self.proxy_manager.block_proxy(proxy)
+            if error509:
+                if proxy:
+                    self.proxy_manager.block_proxy(proxy)
 
-				proxy = self.proxy_manager.get_fastest_proxy()
+                proxy = self.proxy_manager.get_fastest_proxy()
 
-				error509 = False
+            error509 = False
 
-			try:
+            try:
 
-				req = urllib2.Request(url+'/0-0')
+                req = urllib2.Request(url+'/0-0')
 
-				if proxy:
-					req.set_proxy(proxy, 'http')
+                if proxy:
+                    req.set_proxy(proxy, 'http')
 
-				connection = urllib2.urlopen(req)
+                connection = urllib2.urlopen(req)
 
-				connection.read()
+                connection.read()
 
-				print("MEGA DL URL IS OK!")
-				return True
+                print("MEGA DL URL IS OK!")
+                return True
 
-			except urllib2.HTTPError as err:
-				print("CHECKING MEGA DL URL ERROR %d" % err.code)
+            except urllib2.HTTPError as err:
+                print("CHECKING MEGA DL URL ERROR %d" % err.code)
 
-				if err.code == 509:
-					error509 = True
+                if err.code == 509:
+                    error509 = True
                 else:
                     error = True
 
