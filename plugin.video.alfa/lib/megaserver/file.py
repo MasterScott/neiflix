@@ -78,13 +78,17 @@ class File(object):
         return False
 
 
-    def refreshMegaDownloadUrl(self):
+    def refreshMegaDownloadUrl(self, cv_new_url=None):
         if self.url_lock.acquire(False):
 
             while not self.url or not self.checkMegaDownloadUrl(self.url):
                 self.url=self.cursor.get_new_url_from_api()
 
             self.url_lock.release()
+
+            if cv_new_url:
+                with cv_new_url:
+                    cv_new_url.notifyAll()
 
             return True
 

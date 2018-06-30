@@ -2,10 +2,10 @@
 
 import threading
 import MegaProxyManager
+import Queue
 import Chunk
 import os
 
-MAX_CHUNK_BUFFER_SIZE = 20
 CHUNK_SIZE = 1048576
 
 class ChunkWriter():
@@ -18,11 +18,13 @@ class ChunkWriter():
 		self.queue = {}
 		self.cv_queue_full = threading.Condition()
 		self.cv_new_element = threading.Condition()
+		self.cv_error_503 = threading.Condition()
 		self.bytes_written = start_offset
 		self.exit = False
 		self.next_offset_required = start_offset
 		self.chunk_offset_lock = threading.Lock()
 		self.proxy_manager = MegaProxyManager.MegaProxyManager()
+		self.offset_rejected = Queue.Queue()
 
 
 	def run(self):
@@ -57,17 +59,24 @@ class ChunkWriter():
 
 		self.exit = True
 
+		with self.cv_error_503:
+			self.cv_error_503.notifyAll()
+
 		print("ChunkWriter BYE BYE")
 
 
 	def nextOffset(self):
-		self.chunk_offset_lock.acquire()
+		
+		if not self.offset_rejected.empty():
+			next_offset = self.offset_rejected.get()
+		else:
+			self.chunk_offset_lock.acquire()
 
-		next_offset = self.next_offset_required
+			next_offset = self.next_offset_required
 
-		self.next_offset_required = self.next_offset_required + CHUNK_SIZE if self.next_offset_required + CHUNK_SIZE < self.end_offset else -1;
+			self.next_offset_required = self.next_offset_required + CHUNK_SIZE if self.next_offset_required + CHUNK_SIZE < self.end_offset else -1;
 
-		self.chunk_offset_lock.release()
+			self.chunk_offset_lock.release()
 
 		return next_offset
 

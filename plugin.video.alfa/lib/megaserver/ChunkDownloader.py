@@ -6,7 +6,7 @@ import Chunk
 import time
 import MegaProxyManager
 
-MAX_CHUNK_BUFFER_SIZE = 20
+MAX_CHUNK_BUFFER_SIZE = 40
 BLOCK_SIZE = 16*1024
 WORKERS_TURBO = 16
 
@@ -17,6 +17,7 @@ class ChunkDownloader():
 		self.chunk_writer = chunk_writer
 		self.proxy_manager = MegaProxyManager.MegaProxyManager()
 		self.url = self.chunk_writer.cursor._file.url
+		self.cv_new_url = threading.Condition()
 		self.proxy = None
 		self.exit = False
 
@@ -46,7 +47,7 @@ class ChunkDownloader():
 
 				if not self.chunk_writer.exit and not self.exit:
 
-					if not error and not error509:
+					if offset<0 or (not error and not error509):
 						offset = self.chunk_writer.nextOffset()
 					elif self.proxy:
 						print("ChunkDownloader[%d] bloqueando proxy %s" % (self.id, self.proxy))
@@ -81,54 +82,61 @@ class ChunkDownloader():
 
 							connection = urllib2.urlopen(req)
 
-							if connection.getcode() == 200 or connection.getcode() == 206:
+							bytes_read = 0
 
-								bytes_read = 0
+							chunk.data = bytearray()
 
-								chunk.data = bytearray()
+							while bytes_read < chunk.size and not self.chunk_writer.exit and not self.exit:
+								to_read = min(BLOCK_SIZE, chunk.size - bytes_read)
 
-								while bytes_read < chunk.size and not self.chunk_writer.exit and not self.exit:
-									to_read = min(BLOCK_SIZE, chunk.size - bytes_read)
+								try:
+									chunk.data+=connection.read(to_read)
+									bytes_read+=to_read
+								except Exception:
+									pass
 
-									try:
-										chunk.data+=connection.read(to_read)
-										bytes_read+=to_read
-									except Exception:
-										pass
+							if not self.chunk_writer.exit and not self.exit:
 
-								if not self.chunk_writer.exit and not self.exit:
+								if len(chunk.data) != chunk.size:
+									error = True
+								else:
+									self.chunk_writer.queue[chunk.offset]=chunk
+									with self.chunk_writer.cv_new_element:
+										self.chunk_writer.cv_new_element.notifyAll()
 
-									if len(chunk.data) != chunk.size:
-										error = True
-									else:
-										self.chunk_writer.queue[chunk.offset]=chunk
-										with self.chunk_writer.cv_new_element:
-											self.chunk_writer.cv_new_element.notifyAll()
-
-							elif connection.getcode() == 509:
-								print("HTTP ERROR %d" % connection.getcode())
-								error = True
-								error509 = True
-							else:
-								print("HTTP ERROR %d" % connection.getcode())
-								error = True
-
-								if connection.getcode() == 403:
-									if not self.chunk_writer.cursor._file.refreshMegaDownloadUrl():
-										time.sleep(5)
-									
-									self.url = self.chunk_writer.cursor._file.url
-								elif connection.getcode() == 503:
-									time.sleep(1)
-
-						except Exception as e:
-							print(str(e))
+						except urllib2.HTTPError as err:
 							error = True
+							
+							print("ChunkDownloader[%d] HTTP ERROR %d" % (self.id, err.code))
+
+							if err.code == 509:
+								error509 = True
+							elif err.code == 403:
+								if not self.chunk_writer.cursor._file.refreshMegaDownloadUrl(self.cv_new_url):
+									with self.cv_new_url:
+										self.cv_new_url.wait(5)
+									
+								self.url = self.chunk_writer.cursor._file.url
+							elif err.code == 503 and offset >= 0:
+								self.chunk_writer.offset_rejected.put(offset)
+							
+								offset=-1
+								
+								with self.chunk_writer.cv_error_503:
+									print("ChunkDownloader[%d] me duermo 5 segundos..." % self.id)
+									self.chunk_writer.cv_error_503.wait(5)
+
 					else:
+						print("ChunkDownloader[%d] END OFFSET" % self.id)
 						self.exit = True
 
 			except Exception as e:
-				print(str(e))
+				print("ChunkDownloader[%d] %s" % (self.id, str(e)))
+				
+				if offset >= 0:
+					self.chunk_writer.offset_rejected.put(offset)
+				
+				self.exit = True
 
 		print("ChunkDownloader [%d] BYE BYE" % self.id)
 
