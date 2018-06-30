@@ -6,7 +6,7 @@ import Chunk
 import time
 import MegaProxyManager
 
-MAX_CHUNK_BUFFER_SIZE = 40
+MAX_CHUNK_BUFFER_SIZE = 20
 BLOCK_SIZE = 16*1024
 WORKERS_TURBO = 16
 
