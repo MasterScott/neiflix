@@ -3,6 +3,7 @@
 
 import urllib2
 import threading
+import MegaProxyManager
 from cursor import Cursor
 
 class File(object):
@@ -27,6 +28,7 @@ class File(object):
         else:
             self.url = None
         self.url_lock = threading.Lock()
+        self.proxy_manager = MegaProxyManager.MegaProxyManager()
         self.refreshMegaDownloadUrl()
 
 
@@ -40,49 +42,51 @@ class File(object):
 
     def checkMegaDownloadUrl(self, url):
 
-        print("Checking MEGA DL URL %s" % url)
-        
-        error = False
+		print("Checking MEGA DL URL %s" % url)
 
-        error509 = False
+		error = False
 
-        proxy = None
+		error509 = False
 
-        while not error:
+		proxy = None
 
-            if error509:
-                if proxy:
-                    self.proxy_manager.block_proxy(proxy)
-                
-                proxy = self.proxy_manager.get_fastest_proxy()
-                
-                error509 = False
+		while not error:
 
-            req = urllib2.Request(url+'/0-0')
+			if error509:
+				if proxy:
+					self.proxy_manager.block_proxy(proxy)
 
-            if proxy:
-                req.set_proxy(proxy, 'http')
+				proxy = self.proxy_manager.get_fastest_proxy()
 
-            connection = urllib2.urlopen(req)
+				error509 = False
 
-            if connection.getcode() == 200 or connection.getcode == 206:
-                print("MEGA DL URL IS OK!")
-                return True
-            elif connection.getcode() == 509:
-                print("CHECKING MEGA DL URL -> ERROR 509")
-                error509 = True
-            else:
-                print("CHECKING MEGA DL URL -> ERROR %d"%connection.getcode())
-                error = True
+			try:
 
-        return False
+				req = urllib2.Request(url+'/0-0')
+
+				if proxy:
+					req.set_proxy(proxy, 'http')
+
+				connection = urllib2.urlopen(req)
+
+				print("MEGA DL URL IS OK!")
+				return True
+			except urllib2.HTTPError as err:
+				if err.code == 509:
+					error509 = True
+				else:
+					error = True
+
+		print("MEGA DL URL IS BAD!")
+
+		return False
 
 
     def refreshMegaDownloadUrl(self, cv_new_url=None):
         if self.url_lock.acquire(False):
 
             while not self.url or not self.checkMegaDownloadUrl(self.url):
-                self.url=self.cursor.get_new_url_from_api()
+                self.url=self.get_new_url_from_api()
 
             self.url_lock.release()
 
