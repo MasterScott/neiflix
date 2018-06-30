@@ -46,14 +46,13 @@ class ChunkDownloader():
 
 				if not self.chunk_writer.exit and not self.exit:
 
-					if not error:
+					if not error and not error509:
 						offset = self.chunk_writer.nextOffset()
 					elif self.proxy:
 						print("ChunkDownloader[%d] bloqueando proxy %s" % (self.id, self.proxy))
 						self.proxy_manager.block_proxy(self.proxy)
 						self.proxy = self.proxy_manager.get_fastest_proxy()
-					
-					if error509:
+					elif error509:
 						if not turbo:
 							self.chunk_writer.cursor.workers_turbo(WORKERS_TURBO)
 							turbo = True

@@ -63,31 +63,12 @@ class Client(object):
     def _auto_shutdown(self):
         while self.running:
             time.sleep(1)
-            if self.file and self.file.cursor:
+
+            if (self.file and self.file.cursor) or (self.is_playing_fnc and self.is_playing_fnc()):
                 self.last_connect = time.time()
 
-            if self.is_playing_fnc and self.is_playing_fnc():
-                self.last_connect = time.time()
-
-            if self.auto_shutdown:
-                # shudown por haber cerrado el reproductor
-                if self.connected and self.last_connect and self.is_playing_fnc and not self.is_playing_fnc():
-                    if time.time() - self.last_connect - 1 > self.timeout:
-                        self.stop()
-
-                # shutdown por no realizar ninguna conexion
-                if (
-                        not self.file or not self.file.cursor) and self.start_time and self.wait_time \
-                        and not self.connected:
-                    if time.time() - self.start_time - 1 > self.wait_time:
-                        self.stop()
-
-                # shutdown tras la ultima conexion
-                if (
-                        not self.file or not self.file.cursor) and self.timeout and self.connected \
-                        and self.last_connect and not self.is_playing_fnc:
-                    if time.time() - self.last_connect - 1 > self.timeout:
-                        self.stop()
+            if self.auto_shutdown and ((self.connected and self.last_connect and self.is_playing_fnc and not self.is_playing_fnc() and time.time() - self.last_connect - 1 > self.timeout) or ((not self.file or not self.file.cursor) and self.start_time and self.wait_time and not self.connected and time.time() - self.start_time - 1 > self.wait_time) or ((not self.file or not self.file.cursor) and self.timeout and self.connected and self.last_connect and not self.is_playing_fnc and time.time() - self.last_connect - 1 > self.timeout)):
+                self.stop()
 
     def stop(self):
         self.running = False

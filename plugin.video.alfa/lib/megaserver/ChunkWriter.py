@@ -29,9 +29,9 @@ class ChunkWriter():
 
 		print("ChunkWriter HELLO!")
 
-		while not self.exit and self.bytes_written < self.end_offset and self.cursor._file._client.is_playing_fnc and self.cursor._file._client.is_playing_fnc():
+		while not self.exit and self.bytes_written < self.end_offset and self.cursor._file._client.running:
 
-			while not self.exit and self.cursor._file._client.is_playing_fnc and self.cursor._file._client.is_playing_fnc() and self.bytes_written < self.end_offset and self.bytes_written in self.queue:
+			while not self.exit and self.cursor._file._client.running and self.bytes_written < self.end_offset and self.bytes_written in self.queue:
 
 				current_chunk = self.queue.pop(self.bytes_written)
 
@@ -48,7 +48,7 @@ class ChunkWriter():
 				except Exception as e:
 					print(str(e))
 
-			if not self.exit and self.cursor._file._client.is_playing_fnc and self.cursor._file._client.is_playing_fnc() and self.bytes_written < self.end_offset:
+			if not self.exit and self.cursor._file._client.running and self.bytes_written < self.end_offset:
 
 				print("ChunkWriter me duermo hasta que haya chunks nuevos en la cola")
 

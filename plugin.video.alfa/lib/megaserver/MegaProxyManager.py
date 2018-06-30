@@ -32,12 +32,14 @@ class MegaProxyManager():
 		if not self.proxy_list:
 			self.refresh_proxy_list()
 
-		for proxy,block_timestamp in self.proxy_list.iteritems():
+		while True:
 
-			if not block_timestamp or time.time() > block_timestamp:
-				return proxy
+			for proxy,block_timestamp in self.proxy_list.iteritems():
 
-		return None
+				if not block_timestamp or time.time() > block_timestamp:
+					return proxy
+
+			self.refresh_proxy_list()
 
 
 	def block_proxy(self,proxy):
