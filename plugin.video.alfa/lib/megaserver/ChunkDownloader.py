@@ -80,7 +80,7 @@ class ChunkDownloader():
 								req.set_proxy(self.proxy, 'http')
 								print("ChunkDownloader[%d] usando proxy %s" % (self.id, self.proxy))
 
-							connection = urllib2.urlopen(req)
+							connection = urllib2.urlopen(req, timeout=15)
 
 							bytes_read = 0
 
