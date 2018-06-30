@@ -82,6 +82,8 @@ class File(object):
                     error509 = True
                 else:
                     error = True
+            except urllib2.socket.timeout:
+                error = True
 
 
     def refreshMegaDownloadUrl(self, cv_new_url=None):

@@ -125,6 +125,8 @@ class ChunkDownloader():
 								with self.chunk_writer.cv_error_503:
 									print("ChunkDownloader[%d] me duermo 5 segundos..." % self.id)
 									self.chunk_writer.cv_error_503.wait(5)
+						except urllib2.socket.timeout:
+							error = True
 
 					else:
 						print("ChunkDownloader[%d] END OFFSET" % self.id)
