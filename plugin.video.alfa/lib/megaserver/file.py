@@ -63,12 +63,12 @@ class File(object):
 
             try:
 
-                req = urllib2.Request(url+'/0-0', timeout=15)
+                req = urllib2.Request(url+'/0-0')
 
                 if proxy:
                     req.set_proxy(proxy, 'http')
 
-                connection = urllib2.urlopen(req)
+                connection = urllib2.urlopen(req, timeout=15)
 
                 connection.read()
 
