@@ -44,11 +44,11 @@ class File(object):
 
 		print("Checking MEGA DL URL %s" % url)
 
-		error = False
-
 		error509 = False
 
 		proxy = None
+
+        error = False
 
 		while not error:
 
@@ -73,16 +73,14 @@ class File(object):
 
 				print("MEGA DL URL IS OK!")
 				return True
+
 			except urllib2.HTTPError as err:
 				print("CHECKING MEGA DL URL ERROR %d" % err.code)
+
 				if err.code == 509:
 					error509 = True
-				else:
-					error = True
-
-		print("MEGA DL URL IS BAD!")
-
-		return False
+                else:
+                    error = True
 
 
     def refreshMegaDownloadUrl(self, cv_new_url=None):
