@@ -60,6 +60,7 @@ class File(object):
 
             error509 = False
 
+
             try:
 
                 req = urllib2.Request(url+'/0-0')
