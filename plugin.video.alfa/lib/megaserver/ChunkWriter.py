@@ -2,6 +2,7 @@
 
 import threading
 import MegaProxyManager
+import time
 import Queue
 import Chunk
 import os
@@ -77,6 +78,8 @@ class ChunkWriter():
 			self.next_offset_required = self.next_offset_required + CHUNK_SIZE if self.next_offset_required + CHUNK_SIZE < self.end_offset else -1;
 
 			self.chunk_offset_lock.release()
+
+		time.sleep(0.25)
 
 		return next_offset
 

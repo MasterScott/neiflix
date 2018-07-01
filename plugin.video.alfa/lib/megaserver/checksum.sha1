@@ -1,6 +1,6 @@
-a83ae09c0511296217a29a806637f7e47591a539  ChunkDownloader.py
+67ba380ed84d23076ffbfa0ebefd68139c49ffd8  ChunkDownloader.py
 58ce5dd8df23fd7ba7be0ce45208f35820b99328  Chunk.py
-e8b6a94811021431677ed9d590125718004ec1ec  ChunkWriter.py
+3112fc9ac9b33656ac0f1d572067430cccf37e60  ChunkWriter.py
 9165e99bbecd91341dc8e65b4ffb7ca6f4654f56  client.py
 29dd181329d0aee05e10bfffc5ca76de311cbc9b  crypto.py
 e0c91318098664927da57649a3b9d3b1828a479d  cursor.py

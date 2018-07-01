@@ -26,8 +26,6 @@ class ChunkDownloader():
 
 		print("ChunkDownloader [%d] HELLO!" % self.id)
 
-		time.sleep((self.id - 1)*0.5)
-
 		error = False
 
 		error509 = False
