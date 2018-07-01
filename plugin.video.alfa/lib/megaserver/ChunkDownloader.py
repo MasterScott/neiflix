@@ -45,13 +45,14 @@ class ChunkDownloader():
 
 				if not self.chunk_writer.exit and not self.exit:
 
-					if offset<0 or (not error and not error509):
+					if offset<0 or not error:
 						offset = self.chunk_writer.nextOffset()
 					elif self.proxy:
 						print("ChunkDownloader[%d] bloqueando proxy %s" % (self.id, self.proxy))
 						self.proxy_manager.block_proxy(self.proxy)
 						self.proxy = self.proxy_manager.get_fastest_proxy()
-					elif error509:
+					
+					if error509:
 						if not turbo:
 							self.chunk_writer.cursor.workers_turbo(WORKERS_TURBO)
 							turbo = True
@@ -115,14 +116,14 @@ class ChunkDownloader():
 										self.cv_new_url.wait(5)
 									
 								self.url = self.chunk_writer.cursor._file.url
-							elif err.code == 503 and offset >= 0:
+							elif err.code == 503 and offset >= 0 and not self.proxy:
 								self.chunk_writer.offset_rejected.put(offset)
 							
 								offset=-1
 								
 								with self.chunk_writer.cv_error_503:
-									print("ChunkDownloader[%d] me duermo 5 segundos..." % self.id)
-									self.chunk_writer.cv_error_503.wait(5)
+									print("ChunkDownloader[%d] me duermo 2 segundos..." % self.id)
+									self.chunk_writer.cv_error_503.wait(2)
 						except urllib2.socket.timeout:
 							error = True
 

@@ -24,7 +24,7 @@ class Cursor(object):
         self.pipe_r=None
         self.pipe_w=None
         self.chunk_writer=None
-        self.chunk_downloaders=[]
+        self.chunk_downloaders=None
         self.turbo_lock=threading.Lock()
         self.initial_value = file.initial_value
         self.k = file.k
@@ -39,6 +39,7 @@ class Cursor(object):
             self.prepare_decoder(offset)
         except Exception:
             self.stop_multi_download()
+
 
     def start_multi_download(self, offset):
 
@@ -62,22 +63,22 @@ class Cursor(object):
 
     def workers_turbo(self, workers):
 
-        if self.turbo_lock.acquire(False):
+        if self.chunk_downloaders and self.turbo_lock.acquire(False):
 
-	        current_workers = len(self.chunk_downloaders)
+            current_workers = len(self.chunk_downloaders)
 
-	        if not self.chunk_writer.exit and current_workers > 0 and current_workers < workers:
+            if not self.chunk_writer.exit and current_workers < workers:
 
-	            for c in range(current_workers, workers):
-	                chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
-	                self.chunk_downloaders.append(chunk_downloader)
-	                t = threading.Thread(target=chunk_downloader.run)
-	                t.daemon = True
-	                t.start()
+                for c in range(current_workers, workers):
+                    chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
+                    self.chunk_downloaders.append(chunk_downloader)
+                    t = threading.Thread(target=chunk_downloader.run)
+                    t.daemon = True
+                    t.start()
 
                 platformtools.dialog_notification("NEIFLIX", "MEGA PROXY (TURBO) MODE ENABLED")
 
-	        self.turbo_lock.release()
+            self.turbo_lock.release()
 
 
     def stop_multi_download(self):
@@ -105,7 +106,7 @@ class Cursor(object):
             except Exception as e:
                 print(str(e))
 
-        self.chunk_downloaders = []
+        self.chunk_downloaders = None
 
 
     def read(self, n=None):
@@ -116,7 +117,6 @@ class Cursor(object):
             res = os.read(self.pipe_r, n)
         except Exception:
             res = None
-            pass
 
         if res:
             res = self.decode(res)

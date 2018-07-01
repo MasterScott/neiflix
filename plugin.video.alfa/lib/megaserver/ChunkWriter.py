@@ -79,8 +79,6 @@ class ChunkWriter():
 
 			self.chunk_offset_lock.release()
 
-		time.sleep(0.25)
-
 		return next_offset
 
 
