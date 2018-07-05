@@ -6,6 +6,8 @@ import threading
 import MegaProxyManager
 from cursor import Cursor
 
+SOCKET_TIMEOUT=15
+
 class File(object):
     def __init__(self, info, file_id, key, file, client, folder_id=None):
         self._client = client
@@ -67,7 +69,7 @@ class File(object):
                 if proxy:
                     req.set_proxy(proxy, 'http')
 
-                connection = urllib2.urlopen(req, timeout=15)
+                connection = urllib2.urlopen(req, timeout=SOCKET_TIMEOUT)
 
                 connection.read()
 

@@ -9,6 +9,7 @@ import MegaProxyManager
 MAX_CHUNK_BUFFER_SIZE = 20
 BLOCK_SIZE = 16*1024
 WORKERS_TURBO = 16
+SOCKET_TIMEOUT=15
 
 class ChunkDownloader():
 
@@ -79,7 +80,7 @@ class ChunkDownloader():
 								req.set_proxy(self.proxy, 'http')
 								print("ChunkDownloader[%d] usando proxy %s" % (self.id, self.proxy))
 
-							connection = urllib2.urlopen(req, timeout=15)
+							connection = urllib2.urlopen(req, timeout=SOCKET_TIMEOUT)
 
 							bytes_read = 0
 
@@ -114,12 +115,12 @@ class ChunkDownloader():
 
 							if err.code == 509:
 								error509 = True
-							else:
+							elif err.code == 403:
 								self.url = self.chunk_writer.cursor._file.refreshMegaDownloadUrl()
 
 						except urllib2.socket.timeout:
 							print("ChunkDownloader[%d] socket timeout" % self.id)
-							
+
 							error = True
 
 							if offset >= 0:
