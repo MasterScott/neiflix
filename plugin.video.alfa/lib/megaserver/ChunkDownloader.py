@@ -45,19 +45,19 @@ class ChunkDownloader():
 
 				if not self.chunk_writer.exit and not self.exit:
 
-					if offset<0 or not error:
-						offset = self.chunk_writer.nextOffset()
-					elif self.proxy:
-						print("ChunkDownloader[%d] bloqueando proxy %s" % (self.id, self.proxy))
-						self.proxy_manager.block_proxy(self.proxy)
-						self.proxy = self.proxy_manager.get_fastest_proxy()
-					
 					if error509:
 						if not turbo:
 							self.chunk_writer.cursor.workers_turbo(WORKERS_TURBO)
 							turbo = True
 
+						if self.proxy:
+							print("ChunkDownloader[%d] bloqueando proxy %s" % (self.id, self.proxy))
+							self.proxy_manager.block_proxy(self.proxy)
+
 						self.proxy = self.proxy_manager.get_fastest_proxy()
+
+					if offset<0 or not error:
+						offset = self.chunk_writer.nextOffset()
 
 					error = False
 
@@ -104,19 +104,18 @@ class ChunkDownloader():
 										self.chunk_writer.cv_new_element.notifyAll()
 
 						except urllib2.HTTPError as err:
+							print("ChunkDownloader[%d] HTTP ERROR %d" % (self.id, err.code))
+
 							error = True
 
 							if offset >= 0:
 								self.chunk_writer.offset_rejected.put(offset)
 								offset=-1
-							
-							print("ChunkDownloader[%d] HTTP ERROR %d" % (self.id, err.code))
 
 							if err.code == 509:
 								error509 = True
 							elif err.code == 403 or err.code == 503:
 								self.url = self.chunk_writer.cursor._file.refreshMegaDownloadUrl()
-								self.chunk_writer.cursor._file.url = self.url
 
 						except urllib2.socket.timeout:
 							error = True

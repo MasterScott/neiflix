@@ -91,6 +91,8 @@ class File(object):
         while not url or not self.checkMegaDownloadUrl(url):
             url=self.get_new_url_from_api()
 
+        self.url = url
+
         return url
 
     def get_new_url_from_api(self):
