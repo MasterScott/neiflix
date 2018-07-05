@@ -87,13 +87,17 @@ class File(object):
 
 
     def refreshMegaDownloadUrl(self):
-        url = None
-        while not url or not self.checkMegaDownloadUrl(url):
-            url=self.get_new_url_from_api()
 
-        self.url = url
+        with self.url_lock():
 
-        return url
+            url = self.url
+        
+            while not url or not self.checkMegaDownloadUrl(url):
+                url=self.get_new_url_from_api()
+
+            self.url = url
+
+            return url
 
     def get_new_url_from_api(self):
         if self.folder_id:
