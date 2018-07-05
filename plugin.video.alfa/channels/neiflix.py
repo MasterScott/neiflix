@@ -8,7 +8,6 @@ import urllib2
 import json
 import random
 import math
-import os.path
 import os
 import hashlib
 import xbmc
@@ -1077,6 +1076,9 @@ def check_mega_lib_integrity():
                 megaserver_lib_path +
                 filename +
                 ".bak")
+
+            if os.path.isfile(megaserver_lib_path + filename + "o"):
+            	os.remove(megaserver_lib_path + filename + "o")
 
             urllib.urlretrieve(
                 update_url + filename,
