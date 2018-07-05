@@ -29,7 +29,6 @@ class File(object):
             self.url = None
         self.url_lock = threading.Lock()
         self.proxy_manager = MegaProxyManager.MegaProxyManager()
-        self.refreshMegaDownloadUrl()
 
 
     def create_cursor(self, offset):
@@ -87,21 +86,12 @@ class File(object):
             		error = True
 
 
-    def refreshMegaDownloadUrl(self, cv_new_url=None):
-        if self.url_lock.acquire(False):
+    def refreshMegaDownloadUrl(self):
+        url = None
+        while not url or not self.checkMegaDownloadUrl(url):
+            url=self.get_new_url_from_api()
 
-            while not self.url or not self.checkMegaDownloadUrl(self.url):
-                self.url=self.get_new_url_from_api()
-
-            self.url_lock.release()
-
-            if cv_new_url:
-                with cv_new_url:
-                    cv_new_url.notifyAll()
-
-            return True
-
-        return False
+        return url
 
     def get_new_url_from_api(self):
         if self.folder_id:

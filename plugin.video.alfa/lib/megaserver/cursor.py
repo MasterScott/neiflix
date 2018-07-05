@@ -32,7 +32,7 @@ class Cursor(object):
 
     def mega_request(self, offset):
         if not self._file.url:
-            self._file.refreshMegaDownloadUrl()
+            self._file.url = self._file.refreshMegaDownloadUrl()
 
         try:
             self.start_multi_download(offset)

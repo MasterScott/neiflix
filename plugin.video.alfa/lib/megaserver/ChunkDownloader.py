@@ -105,28 +105,25 @@ class ChunkDownloader():
 
 						except urllib2.HTTPError as err:
 							error = True
+
+							if offset >= 0:
+								self.chunk_writer.offset_rejected.put(offset)
+								offset=-1
 							
 							print("ChunkDownloader[%d] HTTP ERROR %d" % (self.id, err.code))
 
 							if err.code == 509:
 								error509 = True
-							elif err.code == 403:
-								if not self.chunk_writer.cursor._file.refreshMegaDownloadUrl(self.cv_new_url):
-									with self.cv_new_url:
-										self.cv_new_url.wait(5)
-									
-								self.url = self.chunk_writer.cursor._file.url
-							elif err.code == 503 and offset >= 0 and not self.proxy:
-								self.chunk_writer.offset_rejected.put(offset)
-							
-								offset=-1
-								
-								with self.chunk_writer.cv_error_503:
-									print("ChunkDownloader[%d] me duermo 2 segundos..." % self.id)
-									self.chunk_writer.cv_error_503.wait(2)
+							elif err.code == 403 or err.code == 503:
+								self.url = self.chunk_writer.cursor._file.refreshMegaDownloadUrl()
+								self.chunk_writer.cursor._file.url = self.url
+
 						except urllib2.socket.timeout:
 							error = True
 
+							if offset >= 0:
+								self.chunk_writer.offset_rejected.put(offset)
+								offset=-1
 					else:
 						print("ChunkDownloader[%d] END OFFSET" % self.id)
 						self.exit = True
