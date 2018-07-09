@@ -11,6 +11,8 @@ import math
 import os
 import hashlib
 import xbmc
+import xbmcgui
+import xbmcaddon
 import base64
 import pickle
 import socket
@@ -122,18 +124,18 @@ def mega_login(verbose):
         	logger.info("channels.neiflix LOGIN EN MEGA OK")
 
         	if verbose:
-        		platformtools.dialog_notification("NEIFLIX", "LOGIN EN MEGA OK")
+        		xbmcgui.Dialog().notification('NEIFLIX', "LOGIN EN MEGA OK", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
         	if not premium:
         		logger.info("channels.neiflix AVISO: CUENTA DE MEGA NO PREMIUM")
-        		platformtools.dialog_notification("NEIFLIX", "AVISO: CUENTA DE MEGA NO PREMIUM")
+        		xbmcgui.Dialog().notification('NEIFLIX', "AVISO: CUENTA DE MEGA NO PREMIUM", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
         else:
 
     		logger.info("channels.neiflix ERROR AL HACER LOGIN EN MEGA")
 
     		if verbose:
-    			platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN MEGA")
+    			xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN MEGA", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
     return mega_sid
 
@@ -144,13 +146,13 @@ def mainlist(item):
     itemlist = []
 
     if config.get_setting("neiflixuser", "neiflix") == "":
-        platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN NEI")
+        xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
         itemlist.append(
             Item(channel=item.channel, title="[COLOR red][B]Habilita tu cuenta en la configuración.[/B][/COLOR]", action="settingCanal",
                  url=""))
     else:
         if login():
-            platformtools.dialog_notification("NEIFLIX", "¡Bienvenido " + config.get_setting("neiflix_user", "neiflix")+"!")
+            xbmcgui.Dialog().notification('NEIFLIX', "¡Bienvenido " + config.get_setting("neiflix_user", "neiflix")+"!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
             mega_login(True)
             load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
             itemlist.append(Item(channel=item.channel, title="Novedades Películas", action="foro",
@@ -173,7 +175,7 @@ def mainlist(item):
                     title="[COLOR yellow][B]Buscar...[/B][/COLOR]",
                     action="search"))
         else:
-            platformtools.dialog_notification("NEIFLIX", "ERROR AL HACER LOGIN EN NEI")
+            xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
             itemlist.append(
                 Item(channel=item.channel, title="[COLOR red][B]ERROR: Usuario y/o password de NOESTASINVITADO.COM incorrectos (revisa la configuración).[/B][/COLOR]",
                      action="", url="", folder=False))
@@ -1089,6 +1091,7 @@ def check_mega_lib_integrity():
     return modified
 
 if CHECK_MEGA_LIB and check_mega_lib_integrity():
-	platformtools.dialog_notification("NEIFLIX", "Librería de MEGA restaurada")
+	xbmcgui.Dialog().notification('NEIFLIX', "Librería de MEGA restaurada", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+
 
 from megaserver import Mega, MegaProxyServer, RequestError, crypto
