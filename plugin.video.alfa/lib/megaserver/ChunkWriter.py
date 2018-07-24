@@ -19,7 +19,6 @@ class ChunkWriter():
 		self.queue = {}
 		self.cv_queue_full = threading.Condition()
 		self.cv_new_element = threading.Condition()
-		self.cv_error_503 = threading.Condition()
 		self.bytes_written = start_offset
 		self.exit = False
 		self.next_offset_required = start_offset
@@ -60,17 +59,14 @@ class ChunkWriter():
 
 		self.exit = True
 
-		with self.cv_error_503:
-			self.cv_error_503.notifyAll()
-
 		print("ChunkWriter BYE BYE")
 
 
 	def nextOffset(self):
 		
-		if not self.offset_rejected.empty():
-			next_offset = self.offset_rejected.get()
-		else:
+		try:
+			next_offset = self.offset_rejected.get(False)
+		except Queue.Empty:
 			self.chunk_offset_lock.acquire()
 
 			next_offset = self.next_offset_required

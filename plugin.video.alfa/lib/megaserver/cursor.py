@@ -15,7 +15,7 @@ try:
 except ImportError:
     from Cryptodome.Util import Counter
 
-MAX_CHUNK_WORKERS = 8
+CHUNK_WORKERS = 10
 
 class Cursor(object):
     def __init__(self, file):
@@ -53,7 +53,7 @@ class Cursor(object):
 
         self.chunk_downloaders = []
 
-        for c in range(0,MAX_CHUNK_WORKERS):
+        for c in range(0,CHUNK_WORKERS):
             chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
             self.chunk_downloaders.append(chunk_downloader)
             t = threading.Thread(target=chunk_downloader.run)

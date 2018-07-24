@@ -8,7 +8,7 @@ import MegaProxyManager
 
 MAX_CHUNK_BUFFER_SIZE = 20
 BLOCK_SIZE = 16*1024
-WORKERS_TURBO = 16
+WORKERS_TURBO = 20
 SOCKET_TIMEOUT=15
 
 class ChunkDownloader():
@@ -18,7 +18,6 @@ class ChunkDownloader():
 		self.chunk_writer = chunk_writer
 		self.proxy_manager = MegaProxyManager.MegaProxyManager()
 		self.url = self.chunk_writer.cursor._file.url
-		self.cv_new_url = threading.Condition()
 		self.proxy = None
 		self.exit = False
 

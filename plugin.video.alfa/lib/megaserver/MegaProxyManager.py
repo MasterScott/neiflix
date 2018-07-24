@@ -24,7 +24,7 @@ class MegaProxyManager():
 		proxy_data = connection.read()
 
 		for p in proxy_data.split('\n'):
-			self.proxy_list[p]=None
+			self.proxy_list[p]=time.time()
 
 		if len(self.proxy_list) == 0:
 			self.proxy_list = None
@@ -36,11 +36,12 @@ class MegaProxyManager():
 			self.refresh_proxy_list()
 			return self.proxy_list.iteritems().next()[0] if self.proxy_list else None
 		else:
-			for proxy,block_timestamp in self.proxy_list.iteritems():
-				if not block_timestamp or time.time() > block_timestamp:
+			for proxy,timestamp in self.proxy_list.iteritems():
+				if time.time() > timestamp:
 					return proxy
 
 			self.refresh_proxy_list()
+
 			return self.proxy_list.iteritems().next()[0] if self.proxy_list else None
 
 
@@ -48,5 +49,6 @@ class MegaProxyManager():
 
 		if not self.proxy_list:
 			self.refresh_proxy_list()
-		elif proxy in self.proxy_list:
+
+		if proxy in self.proxy_list:
 			self.proxy_list[proxy] = time.time() + PROXY_BLOCK_TIME
