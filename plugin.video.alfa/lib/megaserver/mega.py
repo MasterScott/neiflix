@@ -6,6 +6,7 @@ from .crypto import *
 import json
 import urllib
 import urllib2
+import hashlib
 try:
     from Crypto.PublicKey import RSA
 except ImportError:
@@ -34,21 +35,38 @@ class Mega(object):
         self.sid = None
         self.sequence_num = random.randint(0, 0xFFFFFFFF)
         self.request_id = make_id(10)
+        self.email = None
+        self.account_version = -1
+        self.salt = None
 
         if options is None:
             options = {}
         self.options = options
 
     def login(self, email=None, password=None):
+        
         if email:
+            self.email = email
+
+            if self.account_version == -1:
+                self.readAccountVersionAndSalt()
+
             self._login_user(email, password)
         else:
             self.login_anonymous()
+
         return self
 
     def _login_user(self, email, password):
-        password_aes = prepare_key(str_to_a32(password))
-        uh = stringhash(email, password_aes)
+
+        if self.account_version == 1:
+            password_aes = prepare_key(str_to_a32(password))
+            uh = stringhash(email, password_aes)
+        else:
+            pbkdf2_key = hashlib.pbkdf2_hmac('sha512', password, base64_url_decode(self.salt), 100000, 32)
+            password_aes = str_to_a32(pbkdf2_key[:16])
+            uh = base64_url_encode(pbkdf2_key[-16:])
+
         resp = self._api_request({'a': 'us', 'user': email, 'uh': uh})
         # if numeric error code response
         if isinstance(resp, int):
@@ -117,6 +135,20 @@ class Mega(object):
 
             sid = binascii.unhexlify('0' + sid if len(sid) % 2 else sid)
             self.sid = base64_url_encode(sid[:43])
+
+
+    def readAccountVersionAndSalt(self):
+
+        resp = self._api_request({'a': 'us0', 'user': self.email})
+
+        if isinstance(resp, int):
+            raise RequestError(resp)
+
+        self.account_version = resp['v']
+
+        if 's' in resp:
+            self.salt = resp['s']
+
 
     def _api_request(self, data):
         params = {'id': self.sequence_num}

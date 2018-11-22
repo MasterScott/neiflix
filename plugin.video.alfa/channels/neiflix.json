@@ -61,7 +61,7 @@
     {
       "id": "neiflix_use_mc_reverse",
       "type": "bool",
-      "label": "Usar MEGACRYPTER REVERSE MODE (no es necesario si se usa cuenta de MEGA)",
+      "label": "Usar MEGACRYPTER REVERSE MODE (requiere abrir puerto)",
       "default": false,
       "enabled": true,
       "visible": true

@@ -8,6 +8,6 @@ fa9ec1f53f95389c808687cd1dc60c55402109f7  file.py
 f00fe887ed1169ae30cd3916e493eccdd2bc962d  handler.py
 c5f96b17e0ad949616eab3c1296bc2fffd82fa48  __init__.py
 264e3a78eb6e49ec58f9b3ddf62a37b2b19d5073  MegaProxyManager.py
-5d2e3cc08d7bd6545797669d3a49327aaeaa0ffc  mega.py
+84017001598d2cb8c606ffdee918573caf016e14  mega.py
 ef5ecbbe85b5176558ed82a34fafa9d84f7daf95  proxy.py
 04d5fe83bf17a1051746a108a245b33fda022c96  server.py
