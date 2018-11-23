@@ -36,7 +36,8 @@ class Mega(object):
         self.sequence_num = random.randint(0, 0xFFFFFFFF)
         self.request_id = make_id(10)
         self.email = None
-        self.account_version = -1
+        self.password = None
+        self.account_version = None
         self.salt = None
 
         if options is None:
@@ -48,29 +49,31 @@ class Mega(object):
         if email:
             self.email = email
 
-            if self.account_version == -1:
-                self.readAccountVersionAndSalt()
+            self.password = password
 
-            self._login_user(email, password)
+            self._getAccountVersionAndSalt()
+
+            self._login_user()
         else:
             self.login_anonymous()
 
         return self
 
-    def _login_user(self, email, password):
+    def _login_user(self):
 
         if self.account_version == 1:
-            password_aes = prepare_key(str_to_a32(password))
-            uh = stringhash(email, password_aes)
+            password_aes = prepare_key(str_to_a32(self.password))
+            uh = stringhash(self.email, password_aes)
         else:
-            pbkdf2_key = hashlib.pbkdf2_hmac('sha512', password, base64_url_decode(self.salt), 100000, 32)
+            pbkdf2_key = hashlib.pbkdf2_hmac('sha512', self.password, base64_url_decode(self.salt), 100000, 32)
             password_aes = str_to_a32(pbkdf2_key[:16])
             uh = base64_url_encode(pbkdf2_key[-16:])
 
-        resp = self._api_request({'a': 'us', 'user': email, 'uh': uh})
-        # if numeric error code response
+        resp = self._api_request({'a': 'us', 'user': self.email, 'uh': uh})
+
         if isinstance(resp, int):
             raise RequestError(resp)
+            
         self._login_process(resp, password_aes)
 
     def login_anonymous(self):
@@ -137,11 +140,11 @@ class Mega(object):
             self.sid = base64_url_encode(sid[:43])
 
 
-    def readAccountVersionAndSalt(self):
+    def _getAccountVersionAndSalt(self):
 
         resp = self._api_request({'a': 'us0', 'user': self.email})
 
-        if isinstance(resp, int):
+        if isinstance(resp, int) or 'v' not in resp:
             raise RequestError(resp)
 
         self.account_version = resp['v']
