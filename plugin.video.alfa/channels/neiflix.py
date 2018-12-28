@@ -174,6 +174,12 @@ def mainlist(item):
                     channel=item.channel,
                     title="[COLOR yellow][B]Buscar...[/B][/COLOR]",
                     action="search"))
+
+            itemlist.append(
+                Item(
+                    channel=item.channel,
+                    title="[COLOR red][B]Borrar caché[/B][/COLOR]",
+                    action="clean_cache"))
         else:
             xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
             itemlist.append(
@@ -184,6 +190,15 @@ def mainlist(item):
 
 def setting_canal(item):
     return platformtools.show_channel_settings()
+
+
+def clean_cache(item):
+
+    for file in os.listdir(xbmc.translatePath("special://home/temp/")):
+        if file.startswith("kodi_nei_mc_"):
+            os.remove(xbmc.translatePath("special://home/temp/"+file))
+
+    xbmcgui.Dialog().notification('NEIFLIX', "¡Caché borrada!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
 
 def foro(item):
