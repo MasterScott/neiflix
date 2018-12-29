@@ -25,6 +25,12 @@ from platformcode import platformtools
 CHECK_MEGA_LIB = True
 USE_MC_REVERSE = config.get_setting("neiflix_use_mc_reverse", "neiflix")
 
+try:
+	HISTORY = [line.rstrip('\n') for line in open(xbmc.translatePath("special://home/temp/kodi_nei_history"))]
+except:
+	HISTORY = []
+
+
 if USE_MC_REVERSE:
     
     try:
@@ -90,11 +96,13 @@ def mega_login(verbose):
 
             try:
 
-                mega = pickle.load(open(filename_hash, "rb"))
+            	with open(filename_hash, "rb") as file:
 
-                mega.get_user()
+                	mega = pickle.load(file)
 
-                login_ok = True
+                	mega.get_user()
+
+                	login_ok = True
 
             except RequestError:
                 pass
@@ -104,11 +112,14 @@ def mega_login(verbose):
 			mega = Mega()
 
 			try:
-				mega.login(MEGA_EMAIL, MEGA_PASSWORD)
 
-				pickle.dump(mega, open(filename_hash, "wb"))
+				with open(filename_hash, "wb") as file:
 
-				login_ok = True
+					mega.login(MEGA_EMAIL, MEGA_PASSWORD)
+
+					pickle.dump(mega, file)
+
+					login_ok = True
 
 			except RequestError:
 				pass
@@ -148,38 +159,50 @@ def mainlist(item):
     if config.get_setting("neiflixuser", "neiflix") == "":
         xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
         itemlist.append(
-            Item(channel=item.channel, title="[COLOR red][B]Habilita tu cuenta en la configuración.[/B][/COLOR]", action="settingCanal",
+            Item(channel=item.channel, title="[COLOR darkorange][B]Habilita tu cuenta en la configuración.[/B][/COLOR]", action="settingCanal",
                  url=""))
     else:
         if login():
             xbmcgui.Dialog().notification('NEIFLIX', "¡Bienvenido " + config.get_setting("neiflix_user", "neiflix")+"!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
             mega_login(True)
             load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
-            itemlist.append(Item(channel=item.channel, title="Novedades Películas", action="foro",
+            itemlist.append(Item(channel=item.channel, title="Películas", action="foro",
                                  url="https://noestasinvitado.com/peliculas/", folder=True, fa=True, fa_genre=""))
-            itemlist.append(Item(channel=item.channel, title="Novedades Series", action="foro",
+            itemlist.append(Item(channel=item.channel, title="Series", action="foro",
                                  url="https://noestasinvitado.com/series/", folder=True, fa=True, fa_genre="TV_SE"))
-            itemlist.append(Item(channel=item.channel, title="Novedades documetales", action="foro",
+            itemlist.append(Item(channel=item.channel, title="Documetales", action="foro",
                                  url="https://noestasinvitado.com/documentales/", folder=True))
-            itemlist.append(Item(channel=item.channel, title="Novedades vídeos deportivos", action="foro",
+            itemlist.append(Item(channel=item.channel, title="Vídeos deportivos", action="foro",
                                  url="https://noestasinvitado.com/deportes/", folder=True))
-            itemlist.append(Item(channel=item.channel, title="Novedades ANIME", action="foro",
+            itemlist.append(Item(channel=item.channel, title="Anime", action="foro",
                                  url="https://noestasinvitado.com/anime/", folder=True))
-            itemlist.append(Item(channel=item.channel, title="Novedades XXX", action="foro",
+            itemlist.append(Item(channel=item.channel, title="\"Guarreridas\"", action="foro",
                                  url="https://noestasinvitado.com/18-15/", folder=True))
             itemlist.append(Item(channel=item.channel, title="Listados alfabéticos", action="indices",
                                  url="https://noestasinvitado.com/indices/", folder=True))
             itemlist.append(
                 Item(
                     channel=item.channel,
-                    title="[COLOR yellow][B]Buscar...[/B][/COLOR]",
+                    title="[COLOR darkorange][B]Buscar[/B][/COLOR]",
                     action="search"))
 
             itemlist.append(
                 Item(
                     channel=item.channel,
-                    title="[COLOR red][B]Borrar caché[/B][/COLOR]",
+                    title="[B]Preferencias[/B]",
+                    action="settings_nei"))
+
+            itemlist.append(
+                Item(
+                    channel=item.channel,
+                    title="[B]Borrar caché[/B]",
                     action="clean_cache"))
+
+            itemlist.append(
+                Item(
+                    channel=item.channel,
+                    title="[COLOR red][B]Borrar historial[/B][/COLOR]",
+                    action="clean_history"))
         else:
             xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
             itemlist.append(
@@ -188,17 +211,31 @@ def mainlist(item):
     return itemlist
 
 
-def setting_canal(item):
+def settings_nei(item):
     return platformtools.show_channel_settings()
 
 
 def clean_cache(item):
 
-    for file in os.listdir(xbmc.translatePath("special://home/temp/")):
-        if file.startswith("kodi_nei_mc_"):
-            os.remove(xbmc.translatePath("special://home/temp/"+file))
+	conta_files = 0
 
-    xbmcgui.Dialog().notification('NEIFLIX', "¡Caché borrada!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+	for file in os.listdir(xbmc.translatePath("special://home/temp/")):
+		if file.startswith("kodi_nei_") and file != 'kodi_nei_history':
+			os.remove(xbmc.translatePath("special://home/temp/"+file))
+			conta_files=conta_files+1
+
+	xbmcgui.Dialog().notification('NEIFLIX', "¡Caché borrada! (" + str(conta_files) + " archivos eliminados)", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+
+
+def clean_history(item):
+
+	if xbmcgui.Dialog().yesno('NEIFLIX', '¿Estás seguro de que quieres borrar tu historial de vídeos visionados?'):
+
+		try:
+			os.remove(xbmc.translatePath("special://home/temp/kodi_nei_history"))
+			xbmcgui.Dialog().notification('NEIFLIX', "¡Historial borrado!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+		except:
+			pass
 
 
 def foro(item):
@@ -493,66 +530,65 @@ def get_mc_links_group(item):
 
     if os.path.isfile(filename_hash) and os.stat(filename_hash).st_size > 0:
 
-        file = open(filename_hash, "r")
+    	with open(filename_hash, "r") as file:
 
-        i = 1
+	        i = 1
 
-        for line in file:
+	        for line in file:
 
-            line = line.rstrip()
+	            line = line.rstrip()
 
-            if i > 1:
+	            if i > 1:
 
-                url = line
+	                url = line
 
-                url_split = url.split('#')
+	                url_split = url.split('#')
 
-                if len(url_split) >= 3:
+	                if len(url_split) >= 3:
 
-                    name = url_split[1]
+	                    name = url_split[1]
 
-                    size = url_split[2]
+	                    size = url_split[2]
 
-                    title = name + ' [' + str(format_bytes(float(size))) + ']'
+	                    title = name + ' [' + str(format_bytes(float(size))) + ']'
 
-                    itemlist.append(
-                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
-                             folder=False))
+	                    if hashlib.sha1(item.channel+title).hexdigest() in HISTORY:
+	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
-            else:
+	                    itemlist.append(
+	                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
+	                             folder=False))
 
-                links_hash = line
+	            else:
 
-                data = scrapertools.cache_page(
-                    "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
+	                links_hash = line
 
-                patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
+	                data = scrapertools.cache_page(
+	                    "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
 
-                matches = re.compile(patron).findall(data)
+	                patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
 
-                if matches:
+	                matches = re.compile(patron).findall(data)
 
-                    hasheable = ""
+	                if matches:
 
-                    for title, url in matches:
-                        hasheable += title
+	                    hasheable = ""
 
-                    links_hash2 = hashlib.sha1(hasheable).hexdigest()
+	                    for title, url in matches:
+	                        hasheable += title
 
-                    if links_hash != links_hash2:
-                        file.close()
+	                    links_hash2 = hashlib.sha1(hasheable).hexdigest()
 
-                        os.remove(filename_hash)
+	                    if links_hash != links_hash2:
 
-                        return get_mc_links_group(item)
-                else:
-                    file.close()
+	                        os.remove(filename_hash)
 
-                    return itemlist
+	                        return get_mc_links_group(item)
+	                else:
 
-            i += 1
+	                    return itemlist
 
-        file.close()
+	            i += 1
 
         if not itemlist:
             os.remove(filename_hash)
@@ -580,56 +616,57 @@ def get_mc_links_group(item):
 
             compress_pattern = re.compile('\.(zip|rar|rev)$', re.IGNORECASE)
 
-            file = open(filename_hash, "w+")
+            with open(filename_hash, "w+") as file:
 
-            file.write((links_hash + "\n").encode('utf-8'))
+	            file.write((links_hash + "\n").encode('utf-8'))
 
-            for title, url in matches:
+	            for title, url in matches:
 
-                url_split = url.split('/!')
+	                url_split = url.split('/!')
 
-                mc_api_url = url_split[0] + '/api'
+	                mc_api_url = url_split[0] + '/api'
 
-                mc_api_r = {'m': 'info', 'link': url}
+	                mc_api_r = {'m': 'info', 'link': url}
 
-                if USE_MC_REVERSE:
-                	mc_api_r['reverse']=MC_REVERSE_DATA
+	                if USE_MC_REVERSE:
+	                	mc_api_r['reverse']=MC_REVERSE_DATA
 
-                mc_info_res = mc_api_req(
-                    mc_api_url, mc_api_r)
+	                mc_info_res = mc_api_req(
+	                    mc_api_url, mc_api_r)
 
-                name = mc_info_res['name'].replace('#', '')
+	                name = mc_info_res['name'].replace('#', '')
 
-                size = mc_info_res['size']
+	                size = mc_info_res['size']
 
-                key = mc_info_res['key']
+	                key = mc_info_res['key']
 
-                noexpire = mc_info_res['expire'].split('#')[1]
+	                noexpire = mc_info_res['expire'].split('#')[1]
 
-                compress = compress_pattern.search(name)
+	                compress = compress_pattern.search(name)
 
-                if compress:
+	                if compress:
 
-                    itemlist.append(Item(channel=item.channel,
-                                         title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE "
-                                               "(habla con el uploader para que lo suba sin comprimir).[/B][/COLOR]",
-                                         action="", url="", folder=False))
+	                    itemlist.append(Item(channel=item.channel,
+	                                         title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE "
+	                                               "(habla con el uploader para que lo suba sin comprimir).[/B][/COLOR]",
+	                                         action="", url="", folder=False))
 
-                    break
+	                    break
 
-                else:
+	                else:
 
-                    title = name + ' [' + str(format_bytes(size)) + ']'
+	                    title = name + ' [' + str(format_bytes(size)) + ']'
 
-                    url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
+	                    if hashlib.sha1(item.channel+title).hexdigest() in HISTORY:
+	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
-                    file.write((url + "\n").encode('utf-8'))
+	                    url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
 
-                    itemlist.append(
-                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
-                             parentContent=item, folder=False))
+	                    file.write((url + "\n").encode('utf-8'))
 
-            file.close()
+	                    itemlist.append(
+	                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
+	                             parentContent=item, folder=False))
 
         else:
             patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
@@ -651,6 +688,9 @@ def get_mc_links_group(item):
 						title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
 					else:
 						title=url
+
+					if hashlib.sha1(item.channel+title).hexdigest() in HISTORY:
+						title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
 					itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
 						    url=url, parentContent=item, folder=False))
@@ -702,58 +742,53 @@ def find_mc_links(item, data):
 
         if os.path.isfile(filename_hash):
 
-            file = open(filename_hash, "r")
+            with open(filename_hash, "r") as file:
 
-            i = 1
+	            i = 1
 
-            for line in file:
+	            for line in file:
 
-                line = line.rstrip()
+	                line = line.rstrip()
 
-                if i > 1:
+	                if i > 1:
 
-                    url = line
+	                    url = line
 
-                    url_split = url.split('#')
+	                    url_split = url.split('#')
 
-                    name = url_split[1]
+	                    name = url_split[1]
 
-                    size = url_split[2]
+	                    size = url_split[2]
 
-                    title = name + ' [' + str(format_bytes(float(size))) + ']'
+	                    title = name + ' [' + str(format_bytes(float(size))) + ']'
 
-                    itemlist.append(
-                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
-                             parentContent=item, folder=False))
+	                    itemlist.append(
+	                        Item(channel=item.channel, action="play", server='mega', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
+	                             parentContent=item, folder=False))
 
-                else:
+	                else:
 
-                    links_hash = line
+	                    links_hash = line
 
-                    patron = 'https://megacrypter\.noestasinvitado\.com/[!0-9a-zA-Z_/-]+'
+	                    patron = 'https://megacrypter\.noestasinvitado\.com/[!0-9a-zA-Z_/-]+'
 
-                    matches = re.compile(patron).findall(data)
+	                    matches = re.compile(patron).findall(data)
 
-                    if matches:
+	                    if matches:
 
-                        links_hash2 = hashlib.sha1(
-                            "".join(matches)).hexdigest()
+	                        links_hash2 = hashlib.sha1(
+	                            "".join(matches)).hexdigest()
 
-                        if links_hash != links_hash2:
-                            file.close()
+	                        if links_hash != links_hash2:
 
-                            os.remove(filename_hash)
+	                            os.remove(filename_hash)
 
-                            return find_mc_links(item, data)
-                    else:
+	                            return find_mc_links(item, data)
+	                    else:
 
-                        file.close()
+	                        return itemlist
 
-                        return itemlist
-
-                i += 1
-
-            file.close()
+	                i += 1
 
         else:
 
@@ -768,58 +803,56 @@ def find_mc_links(item, data):
                 compress_pattern = re.compile(
                     '\.(zip|rar|rev)$', re.IGNORECASE)
 
-                file = open(filename_hash, "w+")
+                with open(filename_hash, "w+") as file:
 
-                links_hash = hashlib.sha1("".join(matches)).hexdigest()
+	                links_hash = hashlib.sha1("".join(matches)).hexdigest()
 
-                file.write((links_hash + "\n").encode('utf-8'))
+	                file.write((links_hash + "\n").encode('utf-8'))
 
-                for url in matches:
+	                for url in matches:
 
-                    if url not in urls:
+	                    if url not in urls:
 
-                        urls.append(url)
+	                        urls.append(url)
 
-                        url_split = url.split('/!')
+	                        url_split = url.split('/!')
 
-                        mc_api_url = url_split[0] + '/api'
+	                        mc_api_url = url_split[0] + '/api'
 
-                        mc_api_r = {'m': 'info', 'link': url}
+	                        mc_api_r = {'m': 'info', 'link': url}
 
-                        if USE_MC_REVERSE:
-                			mc_api_r['reverse']=MC_REVERSE_DATA
+	                        if USE_MC_REVERSE:
+	                			mc_api_r['reverse']=MC_REVERSE_DATA
 
-                        mc_info_res = mc_api_req(
-                            mc_api_url, mc_api_r)
+	                        mc_info_res = mc_api_req(
+	                            mc_api_url, mc_api_r)
 
-                        name = mc_info_res['name'].replace('#', '')
+	                        name = mc_info_res['name'].replace('#', '')
 
-                        size = mc_info_res['size']
+	                        size = mc_info_res['size']
 
-                        key = mc_info_res['key']
+	                        key = mc_info_res['key']
 
-                        if mc_info_res['expire']:
-                            noexpire = mc_info_res['expire'].split('#')[1]
-                        else:
-                            noexpire = ''
+	                        if mc_info_res['expire']:
+	                            noexpire = mc_info_res['expire'].split('#')[1]
+	                        else:
+	                            noexpire = ''
 
-                        compress = compress_pattern.search(name)
+	                        compress = compress_pattern.search(name)
 
-                        if compress:
-                            itemlist.append(Item(channel=item.channel,
-                                                 title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE"
-                                                       " (habla con el uploader para que lo suba sin comprimir)."
-                                                       "[/B][/COLOR]",
-                                                 action="", url="", folder=False))
-                            break
-                        else:
-                            title = name + ' [' + str(format_bytes(size)) + ']'
-                            url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
-                            file.write((url + "\n").encode('utf-8'))
-                            itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
-                                                 url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
-
-                file.close()
+	                        if compress:
+	                            itemlist.append(Item(channel=item.channel,
+	                                                 title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE"
+	                                                       " (habla con el uploader para que lo suba sin comprimir)."
+	                                                       "[/B][/COLOR]",
+	                                                 action="", url="", folder=False))
+	                            break
+	                        else:
+	                            title = name + ' [' + str(format_bytes(size)) + ']'
+	                            url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
+	                            file.write((url + "\n").encode('utf-8'))
+	                            itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
+	                                                 url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
 
             else:
             	patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
@@ -975,6 +1008,23 @@ def extract_title(title):
         return ""
 
 
+def play(item):
+
+	itemlist = []
+
+	checksum = hashlib.sha1(item.channel+item.title).hexdigest()
+
+	if checksum not in HISTORY:
+		HISTORY.append(checksum)
+
+		with open(xbmc.translatePath("special://home/temp/kodi_nei_history"), "a+") as file:
+			file.write((checksum+"\n").encode('utf-8'))
+
+	itemlist.append(item)
+
+	return itemlist
+
+
 def extract_year(title):
     pattern = re.compile('([0-9]{4})[^p]', re.IGNORECASE)
 
@@ -1085,23 +1135,27 @@ def check_mega_lib_integrity():
 
             modified = True
 
-        elif hashlib.sha1(open(megaserver_lib_path + filename, 'rb').read()).hexdigest() != checksum:
+        else:
 
-            os.rename(
-                megaserver_lib_path +
-                filename,
-                megaserver_lib_path +
-                filename +
-                ".bak")
+        	with open(megaserver_lib_path + filename, 'rb') as f:
 
-            if os.path.isfile(megaserver_lib_path + filename + "o"):
-            	os.remove(megaserver_lib_path + filename + "o")
+        		if hashlib.sha1(f.read()).hexdigest() != checksum:
 
-            urllib.urlretrieve(
-                update_url + filename,
-                megaserver_lib_path + filename)
+		            os.rename(
+		                megaserver_lib_path +
+		                filename,
+		                megaserver_lib_path +
+		                filename +
+		                ".bak")
 
-            modified = True
+		            if os.path.isfile(megaserver_lib_path + filename + "o"):
+		            	os.remove(megaserver_lib_path + filename + "o")
+
+		            urllib.urlretrieve(
+		                update_url + filename,
+		                megaserver_lib_path + filename)
+
+		            modified = True
 
     return modified
 
