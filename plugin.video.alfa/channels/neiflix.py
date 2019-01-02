@@ -526,7 +526,7 @@ def get_mc_links_group(item):
     id = item.mc_group_id
 
     filename_hash = xbmc.translatePath(
-        "special://home/temp/kodi_nei_mc_" + hashlib.sha1(item.channel + item.url + id).hexdigest())
+        "special://home/temp/kodi_nei_mc_" + hashlib.sha1(item.url + id).hexdigest())
 
     if os.path.isfile(filename_hash) and os.stat(filename_hash).st_size > 0:
 
@@ -552,7 +552,7 @@ def get_mc_links_group(item):
 
 	                    title = name + ' [' + str(format_bytes(float(size))) + ']'
 
-	                    if hashlib.sha1(item.channel+title).hexdigest() in HISTORY:
+	                    if hashlib.sha1(title).hexdigest() in HISTORY:
 	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
 	                    itemlist.append(
@@ -657,7 +657,7 @@ def get_mc_links_group(item):
 
 	                    title = name + ' [' + str(format_bytes(size)) + ']'
 
-	                    if hashlib.sha1(item.channel+title).hexdigest() in HISTORY:
+	                    if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
 	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
 	                    url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
@@ -689,7 +689,7 @@ def get_mc_links_group(item):
 					else:
 						title=url
 
-					if hashlib.sha1(item.channel+title).hexdigest() in HISTORY:
+					if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
 						title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
 					itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
@@ -738,7 +738,7 @@ def find_mc_links(item, data):
         mega_sid = mega_login(False)
 
         filename_hash = xbmc.translatePath(
-            "special://home/temp/kodi_nei_mc_" + hashlib.sha1(item.channel + item.url).hexdigest())
+            "special://home/temp/kodi_nei_mc_" + hashlib.sha1(item.url).hexdigest())
 
         if os.path.isfile(filename_hash):
 
@@ -1012,7 +1012,7 @@ def play(item):
 
 	itemlist = []
 
-	checksum = hashlib.sha1(item.channel+item.title).hexdigest()
+	checksum = hashlib.sha1(item.title.replace("[COLOR green][B](VISTO)[/B][/COLOR] ",'')).hexdigest()
 
 	if checksum not in HISTORY:
 		HISTORY.append(checksum)
