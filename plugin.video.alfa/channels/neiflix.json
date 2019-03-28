@@ -78,7 +78,7 @@
       "id": "include_in_global_search",
       "type": "bool",
       "label": "Incluir NEIFLIX en la búsqueda global",
-      "default": false,
+      "default": true,
       "enabled": true,
       "visible": true
     }

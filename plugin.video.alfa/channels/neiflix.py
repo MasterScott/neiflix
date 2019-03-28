@@ -67,7 +67,7 @@ UPLOADERS_BLACKLIST = [
 def login():
     logger.info("channels.neiflix login")
 
-    scrapertools.cache_page("https://noestasinvitado.com/login/")
+    scrapertools.downloadpage("https://noestasinvitado.com/login/")
 
     neiflix_login = config.get_setting("neiflix_user", "neiflix")
 
@@ -76,7 +76,7 @@ def login():
     post = "user=" + neiflix_login + "&passwrd=" + \
            neiflix_password + "&cookielength=-1"
 
-    data = scrapertools.cache_page(
+    data = scrapertools.downloadpage(
         "https://noestasinvitado.com/login2/", post=post)
 
     return data.find(neiflix_login) != -1
@@ -243,7 +243,7 @@ def foro(item):
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = scrapertools.downloadpage(item.url)
 
     mc_links = False
 
@@ -381,7 +381,7 @@ def search(item, texto):
                                           "1%5D=91&brd%5B90%5D=90&brd%5B92%5D=92&brd%5B88%5D=88&brd%5B84%5D" \
                                           "=84&brd%5B212%5D=212&brd%5B94%5D=94&brd%5B23%5D=23&submit=Buscar"
 
-    data = scrapertools.cache_page(
+    data = scrapertools.downloadpage(
         "https://noestasinvitado.com/search2/", post=post)
 
     patron = '<h5>[^<>]*<a[^<>]+>.*?</a>[^<>]*?<a +href="([^"]+)">(.*?)</a>[^<>]*</h5>[^<>]*<span[^<>]*>.*?' \
@@ -432,7 +432,7 @@ def search(item, texto):
 def search_pag(item):
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = scrapertools.downloadpage(item.url)
 
     patron = '<h5>[^<>]*<a[^<>]+>.*?</a>[^<>]*?<a +href="([^"]+)">(.*?)</a>[^<>]*</h5>[^<>]*<sp' \
              'an[^<>]*>.*?<a[^<>]*"Ver +perfil +de +([^"]+)"'
@@ -563,7 +563,7 @@ def get_mc_links_group(item):
 
 	                links_hash = line
 
-	                data = scrapertools.cache_page(
+	                data = scrapertools.downloadpage(
 	                    "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
 
 	                patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
@@ -598,7 +598,7 @@ def get_mc_links_group(item):
 
     else:
 
-        data = scrapertools.cache_page(
+        data = scrapertools.downloadpage(
             "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
 
         patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
@@ -710,7 +710,7 @@ def find_mc_links(item, data):
             re.IGNORECASE).search(data)
 
         if thanks_match:
-            data = scrapertools.cache_page(item.url + thanks_match.group(0))
+            data = scrapertools.downloadpage(item.url + thanks_match.group(0))
 
     itemlist = []
 
@@ -889,7 +889,7 @@ def find_mc_links(item, data):
 def indice_links(item):
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = scrapertools.downloadpage(item.url)
 
     patron = '<tr class="windowbg2">[^<>]*<td[^<>]*>[^<>]*<img[^<>]*>[^<>]' \
              '*</td>[^<>]*<td>[^<>]*<a href="([^"]+)">(.*?)</a>[^<>]*</td>[^<>]*<td[^<>]*>[^<>]*<a[^<>]*>([^<>]+)'
@@ -1052,7 +1052,7 @@ def get_filmaffinity_data(title, year, genre):
 
     logger.info(url)
 
-    data = scrapertools.cache_page(url)
+    data = scrapertools.downloadpage(url)
 
     res = re.compile(
         "< *?div +class *?= *?\"avgrat-box\" *?> *?([0-9,]+) *?<",
@@ -1078,7 +1078,7 @@ def get_filmaffinity_data(title, year, genre):
                                                                                             "title&country=" \
                                                                                             "&genre=" + genre
 
-        data = scrapertools.cache_page(url)
+        data = scrapertools.downloadpage(url)
 
         res_thumb = re.compile(
             "https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",
