@@ -17,6 +17,7 @@ import base64
 import pickle
 import socket
 from core import scrapertools
+from core import httptools
 from core.item import Item
 from platformcode import config, logger
 from platformcode import platformtools
@@ -67,7 +68,7 @@ UPLOADERS_BLACKLIST = [
 def login():
     logger.info("channels.neiflix login")
 
-    scrapertools.downloadpage("https://noestasinvitado.com/login/")
+    httptools.downloadpage("https://noestasinvitado.com/login/")
 
     neiflix_login = config.get_setting("neiflix_user", "neiflix")
 
@@ -76,8 +77,8 @@ def login():
     post = "user=" + neiflix_login + "&passwrd=" + \
            neiflix_password + "&cookielength=-1"
 
-    data = scrapertools.downloadpage(
-        "https://noestasinvitado.com/login2/", post=post)
+    data = httptools.downloadpage(
+        "https://noestasinvitado.com/login2/", post=post).data
 
     return data.find(neiflix_login) != -1
 
@@ -243,7 +244,7 @@ def foro(item):
 
     itemlist = []
 
-    data = scrapertools.downloadpage(item.url)
+    data = httptools.downloadpage(item.url).data
 
     mc_links = False
 
@@ -381,8 +382,8 @@ def search(item, texto):
                                           "1%5D=91&brd%5B90%5D=90&brd%5B92%5D=92&brd%5B88%5D=88&brd%5B84%5D" \
                                           "=84&brd%5B212%5D=212&brd%5B94%5D=94&brd%5B23%5D=23&submit=Buscar"
 
-    data = scrapertools.downloadpage(
-        "https://noestasinvitado.com/search2/", post=post)
+    data = httptools.downloadpage(
+        "https://noestasinvitado.com/search2/", post=post).data
 
     patron = '<h5>[^<>]*<a[^<>]+>.*?</a>[^<>]*?<a +href="([^"]+)">(.*?)</a>[^<>]*</h5>[^<>]*<span[^<>]*>.*?' \
              '<a[^<>]*"Ver +perfil +de +([^"]+)"'
@@ -432,7 +433,7 @@ def search(item, texto):
 def search_pag(item):
     itemlist = []
 
-    data = scrapertools.downloadpage(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<h5>[^<>]*<a[^<>]+>.*?</a>[^<>]*?<a +href="([^"]+)">(.*?)</a>[^<>]*</h5>[^<>]*<sp' \
              'an[^<>]*>.*?<a[^<>]*"Ver +perfil +de +([^"]+)"'
@@ -563,8 +564,8 @@ def get_mc_links_group(item):
 
 	                links_hash = line
 
-	                data = scrapertools.downloadpage(
-	                    "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
+	                data = httptools.downloadpage(
+	                    "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1").data
 
 	                patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
 
@@ -598,8 +599,8 @@ def get_mc_links_group(item):
 
     else:
 
-        data = scrapertools.downloadpage(
-            "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1")
+        data = httptools.downloadpage(
+            "https://noestasinvitado.com/gen_mc.php?id=" + id + "&raw=1").data
 
         patron = '(.*? *?\[[0-9.]+ *?.*?\]) *?(https://megacrypter\.noestasinvitado\.com/.+)'
 
@@ -710,7 +711,7 @@ def find_mc_links(item, data):
             re.IGNORECASE).search(data)
 
         if thanks_match:
-            data = scrapertools.downloadpage(item.url + thanks_match.group(0))
+            data = httptools.downloadpage(item.url + thanks_match.group(0)).data
 
     itemlist = []
 
@@ -889,7 +890,7 @@ def find_mc_links(item, data):
 def indice_links(item):
     itemlist = []
 
-    data = scrapertools.downloadpage(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<tr class="windowbg2">[^<>]*<td[^<>]*>[^<>]*<img[^<>]*>[^<>]' \
              '*</td>[^<>]*<td>[^<>]*<a href="([^"]+)">(.*?)</a>[^<>]*</td>[^<>]*<td[^<>]*>[^<>]*<a[^<>]*>([^<>]+)'
@@ -1052,7 +1053,7 @@ def get_filmaffinity_data(title, year, genre):
 
     logger.info(url)
 
-    data = scrapertools.downloadpage(url)
+    data = httptools.downloadpage(url).data
 
     res = re.compile(
         "< *?div +class *?= *?\"avgrat-box\" *?> *?([0-9,]+) *?<",
@@ -1078,7 +1079,7 @@ def get_filmaffinity_data(title, year, genre):
                                                                                             "title&country=" \
                                                                                             "&genre=" + genre
 
-        data = scrapertools.downloadpage(url)
+        data = httptools.downloadpage(url).data
 
         res_thumb = re.compile(
             "https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",
