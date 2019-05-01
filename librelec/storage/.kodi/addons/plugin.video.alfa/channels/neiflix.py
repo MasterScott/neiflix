@@ -1103,9 +1103,9 @@ def get_filmaffinity_data(title, year, genre):
             return [None, thumb_url]
 
 
-# NEIFLIX uses a modified version of MEGA LIB with support for MEGACRYPTER
+# NEIFLIX uses a modified version of Alfa's MEGA LIB with support for MEGACRYPTER and multi thread
 def check_mega_lib_integrity():
-    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/lib/megaserver/'
+    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/storage/.kodi/addons/plugin.video.alfa/lib/megaserver/'
 
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
