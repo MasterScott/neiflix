@@ -7,8 +7,7 @@ echo "Unzipping..."
 unzip /tmp/neiflix_master.zip -d /tmp
 
 echo "Copying files..."
-mv /storage/.config/autostart.sh /storage/.config/autostart.sh.bak
-cp -rvf /tmp/neiflix-master/libreelec/storage/.config/ /storage/
+cat /tmp/neiflix-master/libreelec/storage/.config/autostart.sh >> /storage/.config/autostart.sh
 cp -rvf /tmp/neiflix-master/libreelec/storage/scripts/ /storage/
 cp -rvf /tmp/neiflix-master/libreelec/storage/.kodi/ /storage/
 
