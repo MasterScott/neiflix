@@ -4,7 +4,7 @@
 </p>
 
 ### Setup ([LibreELEC](https://libreelec.tv/)):
-`# wget https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/neiflix_install.sh`
+`# wget https://git.io/fjZQZ`
 
 `# chmod +x neiflix_install.sh`
 
