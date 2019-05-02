@@ -3,7 +3,7 @@
   <a href="https://noestasinvitado.com/" target="_blank">Noestasinvitado.com</a> channel for <a href="https://github.com/alfa-addon/addon" target="_blank">Alfa</a> <a href="https://github.com/xbmc/xbmc" target="_blank">KODI</a>'s addon.
 </p>
 
-### Setup (Libreelec):
+### Setup ([LibreELEC](https://libreelec.tv/)):
 `# wget https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/neiflix_install.sh`
 
 `# chmod +x neiflix_install.sh`
