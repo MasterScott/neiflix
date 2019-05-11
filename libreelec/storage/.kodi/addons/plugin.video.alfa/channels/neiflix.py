@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.0"
+NEIFLIX_VERSION = "1.1"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -69,7 +69,17 @@ else:
 UPLOADERS_BLACKLIST = [
     x.strip() for x in config.get_setting(
         "neiflix_blacklist_uploaders",
-        "neiflix").split(',')]
+        "neiflix").split(',')] if config.get_setting(
+        "neiflix_blacklist_uploaders",
+        "neiflix") else []
+
+
+TITLES_BLACKLIST = [
+    x.strip() for x in config.get_setting(
+        "neiflix_blacklist_titles",
+        "neiflix").split(',')] if config.get_setting(
+        "neiflix_blacklist_titles",
+        "neiflix") else []
 
 
 def login():
@@ -277,7 +287,7 @@ def foro(item):
 
         for scrapedmsg, scrapedurl, scrapedtitle, uploader in matches:
 
-            if uploader not in UPLOADERS_BLACKLIST:
+            if uploader not in UPLOADERS_BLACKLIST and not any(word in scrapedtitle for word in TITLES_BLACKLIST):
 
                 url = urlparse.urljoin(item.url, scrapedurl)
 
@@ -614,6 +624,8 @@ def get_mc_links_group(item):
 
         matches = re.compile(patron).findall(data)
 
+        compress_pattern = re.compile('\.(zip|rar|rev)$', re.IGNORECASE)
+
         if matches:
 
             hasheable = ""
@@ -622,8 +634,6 @@ def get_mc_links_group(item):
                 hasheable += title
 
             links_hash = hashlib.sha1(hasheable).hexdigest()
-
-            compress_pattern = re.compile('\.(zip|rar|rev)$', re.IGNORECASE)
 
             with open(filename_hash, "w+") as file:
 
@@ -698,11 +708,22 @@ def get_mc_links_group(item):
 					else:
 						title=url
 
-					if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
-						title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
+					compress = compress_pattern.search(attributes['n'])
 
-					itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
-						    url=url, parentContent=item, folder=False))
+					if compress:
+
+						itemlist.append(Item(channel=item.channel,
+					             title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE "
+					                   "(habla con el uploader para que lo suba sin comprimir).[/B][/COLOR]",
+					             action="", url="", folder=False))
+
+						break
+
+					else:
+
+						if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
+							title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
+							itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item, folder=False))
 
     return itemlist
 
@@ -807,10 +828,10 @@ def find_mc_links(item, data):
 
             matches = re.compile(patron_mc).findall(data)
 
-            if matches:
-
-                compress_pattern = re.compile(
+            compress_pattern = re.compile(
                     '\.(zip|rar|rev)$', re.IGNORECASE)
+
+            if matches:
 
                 with open(filename_hash, "w+") as file:
 
@@ -864,32 +885,41 @@ def find_mc_links(item, data):
 	                                                 url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
 
             else:
-            	patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
+                patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
 
-            	matches = re.compile(patron_mega).findall(data)
+                matches = re.compile(patron_mega).findall(data)
 
-            	if matches:
+                if matches:
 
-            		for url in matches:
+                    for url in matches:
 
-						if url not in urls:
+                        if url not in urls:
 
-							urls.append(url)
+                            urls.append(url)
 
-							if len(url.split("!")) == 3:
-								file_id = url.split("!")[1]
-								file_key = url.split("!")[2]
-								file = mega_api_req({'a': 'g', 'g': 1, 'p': file_id})
-								key = crypto.base64_to_a32(file_key)
-								k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
-								attributes = crypto.base64_url_decode(file['at'])
-								attributes = crypto.decrypt_attr(attributes, k)
-								title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
-							else:
-								title=url
+                            if len(url.split("!")) == 3:
+                                file_id = url.split("!")[1]
+                                file_key = url.split("!")[2]
+                                file = mega_api_req({'a': 'g', 'g': 1, 'p': file_id})
+                                key = crypto.base64_to_a32(file_key)
+                                k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
+                                attributes = crypto.base64_url_decode(file['at'])
+                                attributes = crypto.decrypt_attr(attributes, k)
+                                title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
+                            else:
+                                title=url
 
-							itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
-							url=url, parentContent=item, folder=False))
+                            compress = compress_pattern.search(attributes['n'])
+
+                            if compress:
+                                itemlist.append(Item(channel=item.channel,
+                                                     title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE"
+                                                           " (habla con el uploader para que lo suba sin comprimir)."
+                                                           "[/B][/COLOR]",
+                                                     action="", url="", folder=False))
+                                break
+                            else:
+                                itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item, folder=False))
 
 
     return itemlist
