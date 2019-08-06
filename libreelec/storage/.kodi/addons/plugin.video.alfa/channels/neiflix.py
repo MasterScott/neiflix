@@ -1198,7 +1198,7 @@ def check_mega_lib_integrity():
 
     #Machacamos también el conector de MEGA con nuestra versión
 	if modified:
-		urllib.urlretrieve('https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/storage/.kodi/addons/plugin.video.alfa/servers/mega.py', xbmc.translatePath('special://home/addons/plugin.video.alfa/servers/'))
+		urllib.urlretrieve('https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/storage/.kodi/addons/plugin.video.alfa/servers/mega.py', xbmc.translatePath('special://home/addons/plugin.video.alfa/servers/mega.py'))
 
     return modified
 
