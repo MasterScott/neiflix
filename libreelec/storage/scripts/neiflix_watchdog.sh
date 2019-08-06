@@ -5,8 +5,6 @@ BASE_URL="https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/
 
 FILES="channels/neiflix.py channels/neiflix.json resources/media/channels/banner/neiflix2_b.png resources/media/channels/thumb/neiflix2_t.png resources/media/channels/fanart/neiflix2_f.png"
 
-wget "${BASE_URL}servers/mega_checksum.sha1" -O "/tmp/mega_checksum.sha1"
-
 while [ true ]; do
 
 	set -- $FILES
@@ -19,16 +17,6 @@ while [ true ]; do
 
 	    shift
 	done
-
-	cd "${BASE_PATH}servers/"
-
-	sha1sum -cs "/tmp/mega_checksum.sha1"
-
-	if [ $? -eq 1 ]; then
-
-		wget "${BASE_URL}servers/mega.py" -O "${BASE_PATH}servers/mega.py"
-
-	fi
 
 	sleep 5
 

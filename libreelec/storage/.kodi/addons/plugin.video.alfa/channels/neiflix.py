@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.1"
+NEIFLIX_VERSION = "1.2"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -1195,6 +1195,10 @@ def check_mega_lib_integrity():
 		                megaserver_lib_path + filename)
 
 		            modified = True
+
+    #Machacamos también el conector de MEGA con nuestra versión
+	if modified:
+		urllib.urlretrieve('https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/storage/.kodi/addons/plugin.video.alfa/servers/mega.py', xbmc.translatePath('special://home/addons/plugin.video.alfa/servers/'))
 
     return modified
 
