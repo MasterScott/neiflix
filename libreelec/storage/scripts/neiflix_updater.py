@@ -6,7 +6,7 @@ import os
 import hashlib
 
 KODI_PATH = '/storage/.kodi/'
-UPDATE_URL = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/channels/'
+UPDATE_URL = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/storage/.kodi/addons/plugin.video.alfa/channels/'
 
 urllib.urlretrieve(UPDATE_URL + 'checksum.sha1', KODI_PATH + 'temp/neiflix_channel.sha1')
 

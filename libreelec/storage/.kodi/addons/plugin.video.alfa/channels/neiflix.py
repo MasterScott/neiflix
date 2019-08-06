@@ -24,13 +24,25 @@ from platformcode import platformtools
 
 
 CHECK_MEGA_LIB = True
+
+NEIFLIX_VERSION = "1.1"
+
+NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
+
+NEIFLIX_PASSWORD = config.get_setting("neiflix_password", "neiflix")
+
+USE_MEGA_PREMIUM = config.get_setting("neiflix_mega_premium", "neiflix")
+
+MEGA_EMAIL = config.get_setting("neiflix_mega_email", "neiflix")
+
+MEGA_PASSWORD = config.get_setting("neiflix_mega_password", "neiflix")
+
 USE_MC_REVERSE = config.get_setting("neiflix_use_mc_reverse", "neiflix")
 
 try:
 	HISTORY = [line.rstrip('\n') for line in open(xbmc.translatePath("special://home/temp/kodi_nei_history"))]
 except:
 	HISTORY = []
-
 
 if USE_MC_REVERSE:
     
@@ -40,7 +52,7 @@ if USE_MC_REVERSE:
 
     	if MC_REVERSE_PORT >= 1024 and MC_REVERSE_PORT <= 65535:
 
-    		MC_REVERSE_PASS = hashlib.sha1(config.get_setting("neiflix_user", "neiflix")).hexdigest()
+    		MC_REVERSE_PASS = hashlib.sha1(NEIFLIX_LOGIN).hexdigest()
 
     		MC_REVERSE_DATA = str(MC_REVERSE_PORT) + ":" + base64.b64encode(
     			"neiflix:" + MC_REVERSE_PASS)
@@ -53,35 +65,41 @@ else:
     MC_REVERSE_PORT = None
     MC_REVERSE_PASS = None
 
-USE_MEGA_PREMIUM = config.get_setting("neiflix_mega_premium", "neiflix")
-
-MEGA_EMAIL = config.get_setting("neiflix_mega_email", "neiflix")
-
-MEGA_PASSWORD = config.get_setting("neiflix_mega_password", "neiflix")
 
 UPLOADERS_BLACKLIST = [
     x.strip() for x in config.get_setting(
         "neiflix_blacklist_uploaders",
-        "neiflix").split(',')]
+        "neiflix").split(',')] if config.get_setting(
+        "neiflix_blacklist_uploaders",
+        "neiflix") else []
+
+
+TITLES_BLACKLIST = [
+    x.strip() for x in config.get_setting(
+        "neiflix_blacklist_titles",
+        "neiflix").split(',')] if config.get_setting(
+        "neiflix_blacklist_titles",
+        "neiflix") else []
 
 
 def login():
-    logger.info("channels.neiflix login")
+	logger.info("channels.neiflix login")
 
-    httptools.downloadpage("https://noestasinvitado.com/login/")
+	httptools.downloadpage("https://noestasinvitado.com/login/")
 
-    neiflix_login = config.get_setting("neiflix_user", "neiflix")
+	if NEIFLIX_LOGIN and NEIFLIX_PASSWORD:
 
-    neiflix_password = config.get_setting("neiflix_password", "neiflix")
+		post = "user=" + NEIFLIX_LOGIN + "&passwrd=" + \
+		NEIFLIX_PASSWORD + "&cookielength=-1"
 
-    post = "user=" + neiflix_login + "&passwrd=" + \
-           neiflix_password + "&cookielength=-1"
+		data = httptools.downloadpage(
+		"https://noestasinvitado.com/login2/", post=post).data
 
-    data = httptools.downloadpage(
-        "https://noestasinvitado.com/login2/", post=post).data
+		return data.find(NEIFLIX_LOGIN) != -1
 
-    return data.find(neiflix_login) != -1
+	else:
 
+		return false
 
 def mega_login(verbose):
     mega_sid = ''
@@ -136,18 +154,18 @@ def mega_login(verbose):
         	logger.info("channels.neiflix LOGIN EN MEGA OK")
 
         	if verbose:
-        		xbmcgui.Dialog().notification('NEIFLIX', "LOGIN EN MEGA OK", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+        		xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "LOGIN EN MEGA OK", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
         	if not premium:
         		logger.info("channels.neiflix AVISO: CUENTA DE MEGA NO PREMIUM")
-        		xbmcgui.Dialog().notification('NEIFLIX', "AVISO: CUENTA DE MEGA NO PREMIUM", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+        		xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "AVISO: CUENTA DE MEGA NO PREMIUM", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
         else:
 
     		logger.info("channels.neiflix ERROR AL HACER LOGIN EN MEGA")
 
     		if verbose:
-    			xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN MEGA", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+    			xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "ERROR AL HACER LOGIN EN MEGA", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
     return mega_sid
 
@@ -157,14 +175,14 @@ def mainlist(item):
 
     itemlist = []
 
-    if config.get_setting("neiflixuser", "neiflix") == "":
-        xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+    if not NEIFLIX_LOGIN:
+        xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
         itemlist.append(
-            Item(channel=item.channel, title="[COLOR darkorange][B]Habilita tu cuenta en la configuración.[/B][/COLOR]", action="settingCanal",
+            Item(channel=item.channel, title="[COLOR darkorange][B]Habilita tu cuenta en la configuración.[/B][/COLOR]", action="settings_nei",
                  url=""))
     else:
         if login():
-            xbmcgui.Dialog().notification('NEIFLIX', "¡Bienvenido " + config.get_setting("neiflix_user", "neiflix")+"!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+            xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "¡Bienvenido " + NEIFLIX_LOGIN +"!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
             mega_login(True)
             load_mega_proxy('', MC_REVERSE_PORT, MC_REVERSE_PASS)
             itemlist.append(Item(channel=item.channel, title="Películas", action="foro",
@@ -205,7 +223,7 @@ def mainlist(item):
                     title="[COLOR red][B]Borrar historial[/B][/COLOR]",
                     action="clean_history"))
         else:
-            xbmcgui.Dialog().notification('NEIFLIX', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+            xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "ERROR AL HACER LOGIN EN NEI", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
             itemlist.append(
                 Item(channel=item.channel, title="[COLOR red][B]ERROR: Usuario y/o password de NOESTASINVITADO.COM incorrectos (revisa la configuración).[/B][/COLOR]",
                      action="", url="", folder=False))
@@ -225,16 +243,16 @@ def clean_cache(item):
 			os.remove(xbmc.translatePath("special://home/temp/"+file))
 			conta_files=conta_files+1
 
-	xbmcgui.Dialog().notification('NEIFLIX', "¡Caché borrada! (" + str(conta_files) + " archivos eliminados)", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+	xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "¡Caché borrada! (" + str(conta_files) + " archivos eliminados)", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
 
 def clean_history(item):
 
-	if xbmcgui.Dialog().yesno('NEIFLIX', '¿Estás seguro de que quieres borrar tu historial de vídeos visionados?'):
+	if xbmcgui.Dialog().yesno('NEIFLIX (' + NEIFLIX_VERSION + ')', '¿Estás seguro de que quieres borrar tu historial de vídeos visionados?'):
 
 		try:
 			os.remove(xbmc.translatePath("special://home/temp/kodi_nei_history"))
-			xbmcgui.Dialog().notification('NEIFLIX', "¡Historial borrado!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+			xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "¡Historial borrado!", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 		except:
 			pass
 
@@ -269,7 +287,7 @@ def foro(item):
 
         for scrapedmsg, scrapedurl, scrapedtitle, uploader in matches:
 
-            if uploader not in UPLOADERS_BLACKLIST:
+            if uploader not in UPLOADERS_BLACKLIST and not any(word in scrapedtitle for word in TITLES_BLACKLIST):
 
                 url = urlparse.urljoin(item.url, scrapedurl)
 
@@ -606,6 +624,8 @@ def get_mc_links_group(item):
 
         matches = re.compile(patron).findall(data)
 
+        compress_pattern = re.compile('\.(zip|rar|rev)$', re.IGNORECASE)
+
         if matches:
 
             hasheable = ""
@@ -614,8 +634,6 @@ def get_mc_links_group(item):
                 hasheable += title
 
             links_hash = hashlib.sha1(hasheable).hexdigest()
-
-            compress_pattern = re.compile('\.(zip|rar|rev)$', re.IGNORECASE)
 
             with open(filename_hash, "w+") as file:
 
@@ -690,11 +708,22 @@ def get_mc_links_group(item):
 					else:
 						title=url
 
-					if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
-						title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
+					compress = compress_pattern.search(attributes['n'])
 
-					itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
-						    url=url, parentContent=item, folder=False))
+					if compress:
+
+						itemlist.append(Item(channel=item.channel,
+					             title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE "
+					                   "(habla con el uploader para que lo suba sin comprimir).[/B][/COLOR]",
+					             action="", url="", folder=False))
+
+						break
+
+					else:
+
+						if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
+							title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
+							itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item, folder=False))
 
     return itemlist
 
@@ -799,10 +828,10 @@ def find_mc_links(item, data):
 
             matches = re.compile(patron_mc).findall(data)
 
-            if matches:
-
-                compress_pattern = re.compile(
+            compress_pattern = re.compile(
                     '\.(zip|rar|rev)$', re.IGNORECASE)
+
+            if matches:
 
                 with open(filename_hash, "w+") as file:
 
@@ -856,32 +885,41 @@ def find_mc_links(item, data):
 	                                                 url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
 
             else:
-            	patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
+                patron_mega = 'https://mega(?:\.co)?\.nz/#[!0-9a-zA-Z_-]+'
 
-            	matches = re.compile(patron_mega).findall(data)
+                matches = re.compile(patron_mega).findall(data)
 
-            	if matches:
+                if matches:
 
-            		for url in matches:
+                    for url in matches:
 
-						if url not in urls:
+                        if url not in urls:
 
-							urls.append(url)
+                            urls.append(url)
 
-							if len(url.split("!")) == 3:
-								file_id = url.split("!")[1]
-								file_key = url.split("!")[2]
-								file = mega_api_req({'a': 'g', 'g': 1, 'p': file_id})
-								key = crypto.base64_to_a32(file_key)
-								k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
-								attributes = crypto.base64_url_decode(file['at'])
-								attributes = crypto.decrypt_attr(attributes, k)
-								title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
-							else:
-								title=url
+                            if len(url.split("!")) == 3:
+                                file_id = url.split("!")[1]
+                                file_key = url.split("!")[2]
+                                file = mega_api_req({'a': 'g', 'g': 1, 'p': file_id})
+                                key = crypto.base64_to_a32(file_key)
+                                k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
+                                attributes = crypto.base64_url_decode(file['at'])
+                                attributes = crypto.decrypt_attr(attributes, k)
+                                title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
+                            else:
+                                title=url
 
-							itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title,
-							url=url, parentContent=item, folder=False))
+                            compress = compress_pattern.search(attributes['n'])
+
+                            if compress:
+                                itemlist.append(Item(channel=item.channel,
+                                                     title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE"
+                                                           " (habla con el uploader para que lo suba sin comprimir)."
+                                                           "[/B][/COLOR]",
+                                                     action="", url="", folder=False))
+                                break
+                            else:
+                                itemlist.append(Item(channel=item.channel, action="play", server='mega', title=title, url=url, parentContent=item, folder=False))
 
 
     return itemlist
@@ -1103,9 +1141,9 @@ def get_filmaffinity_data(title, year, genre):
             return [None, thumb_url]
 
 
-# NEIFLIX uses a modified version of MEGA LIB with support for MEGACRYPTER
+# NEIFLIX uses a modified version of Alfa's MEGA LIB with support for MEGACRYPTER and multi thread
 def check_mega_lib_integrity():
-    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/plugin.video.alfa/lib/megaserver/'
+    update_url = 'https://raw.githubusercontent.com/tonikelope/neiflix/master/libreelec/storage/.kodi/addons/plugin.video.alfa/lib/megaserver/'
 
     megaserver_lib_path = xbmc.translatePath(
         'special://home/addons/plugin.video.alfa/lib/megaserver/')
@@ -1161,7 +1199,7 @@ def check_mega_lib_integrity():
     return modified
 
 if CHECK_MEGA_LIB and check_mega_lib_integrity():
-	xbmcgui.Dialog().notification('NEIFLIX', "Librería de MEGA restaurada", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
+	xbmcgui.Dialog().notification('NEIFLIX (' + NEIFLIX_VERSION + ')', "Librería de MEGA restaurada", os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources', 'media', 'channels', 'thumb', 'neiflix2_t.png'), 5000)
 
 
 from megaserver import Mega, MegaProxyServer, RequestError, crypto
