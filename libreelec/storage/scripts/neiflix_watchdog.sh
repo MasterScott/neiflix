@@ -22,7 +22,7 @@ while [ true ]; do
 
 	cd "${BASE_PATH}servers/"
 
-	sha1sum -c "/tmp/mega_checksum.sha1"
+	sha1sum -cs "/tmp/mega_checksum.sha1"
 
 	if [ $? -eq 1 ]; then
 
