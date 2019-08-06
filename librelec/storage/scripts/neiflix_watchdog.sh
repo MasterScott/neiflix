@@ -18,6 +18,14 @@ while [ true ]; do
 	    shift
 	done
 
+	sha1_hash=$(sha1sum "${BASE_PATH}servers/mega.py" | grep -E -o '[a-f0-9]+' | head -1)
+
+	if [ "$sha1_hash" != "f1a30a53f0160014b614569e9c44d92dc0b32628" ]; then
+
+		wget "${BASE_URL}servers/mega.py" -O "${BASE_PATH}servers/mega.py"
+
+	fi
+
 	sleep 5
 
 done
