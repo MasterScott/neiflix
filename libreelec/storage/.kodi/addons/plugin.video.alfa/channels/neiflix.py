@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.3"
+NEIFLIX_VERSION = "1.4"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -575,7 +575,7 @@ def get_mc_links_group(item):
 	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='neiflix', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
+	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
 	                             folder=False))
 
 	            else:
@@ -684,7 +684,7 @@ def get_mc_links_group(item):
 	                    file.write((url + "\n").encode('utf-8'))
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='neiflix', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
+	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
 	                             parentContent=item, folder=False))
 
         else:
@@ -723,7 +723,7 @@ def get_mc_links_group(item):
 
 						if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
 							title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
-							itemlist.append(Item(channel=item.channel, action="play", server='neiflix', title=title, url=url, parentContent=item, folder=False))
+							itemlist.append(Item(channel=item.channel, action="play", server='nei', title=title, url=url, parentContent=item, folder=False))
 
     return itemlist
 
@@ -793,7 +793,7 @@ def find_mc_links(item, data):
 	                    title = name + ' [' + str(format_bytes(float(size))) + ']'
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='neiflix', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
+	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
 	                             parentContent=item, folder=False))
 
 	                else:
@@ -881,7 +881,7 @@ def find_mc_links(item, data):
 	                            title = name + ' [' + str(format_bytes(size)) + ']'
 	                            url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
 	                            file.write((url + "\n").encode('utf-8'))
-	                            itemlist.append(Item(channel=item.channel, action="play", server='neiflix', title=title,
+	                            itemlist.append(Item(channel=item.channel, action="play", server='nei', title=title,
 	                                                 url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
 
             else:
@@ -919,7 +919,7 @@ def find_mc_links(item, data):
                                                      action="", url="", folder=False))
                                 break
                             else:
-                                itemlist.append(Item(channel=item.channel, action="play", server='neiflix', title=title, url=url, parentContent=item, folder=False))
+                                itemlist.append(Item(channel=item.channel, action="play", server='nei', title=title, url=url, parentContent=item, folder=False))
 
 
     return itemlist
