@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.4"
+NEIFLIX_VERSION = "1.5"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -1097,48 +1097,21 @@ def get_filmaffinity_data(title, year, genre):
         "< *?div +class *?= *?\"avgrat-box\" *?> *?([0-9,]+) *?<",
         re.DOTALL).search(data)
 
+    res_thumb = re.compile(
+            "https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",
+            re.DOTALL).search(data)
+
     if res:
-
-        res_thumb = re.compile(
-            "https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",
-            re.DOTALL).search(data)
-
-        if res_thumb:
-            thumb_url = res_thumb.group(0)
-        else:
-            thumb_url = None
-
-        return [res.group(1).replace(',', '.'), thumb_url]
-
+        rate = res.group(1).replace(',', '.')
     else:
+        rate = None
 
-        url = "https://www.filmaffinity.com/es/advsearch.php?stext=" + title.replace(' ',
-                                                                                     '+') + "&stype%5B%5D=" \
-                                                                                            "title&country=" \
-                                                                                            "&genre=" + genre
+    if res_thumb:
+        thumb_url = res_thumb.group(0)
+    else:
+        thumb_url = None
 
-        data = httptools.downloadpage(url).data
-
-        res_thumb = re.compile(
-            "https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",
-            re.DOTALL).search(data)
-
-        if res_thumb:
-            thumb_url = res_thumb.group(0)
-        else:
-            thumb_url = None
-
-        res = re.compile(
-            "< *?div +class *?= *?\"avgrat-box\" *?> *?([0-9,]+) *?<",
-            re.DOTALL).search(data)
-
-        if res:
-
-            return [res.group(1).replace(',', '.'), thumb_url]
-
-        else:
-
-            return [None, thumb_url]
+    return [rate, thumb_url]
 
 
 # NEIFLIX uses a modified version of Alfa's MEGA LIB with support for MEGACRYPTER and multi thread
