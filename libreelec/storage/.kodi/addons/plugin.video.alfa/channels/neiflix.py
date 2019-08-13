@@ -325,8 +325,13 @@ def foro(item):
 
                     if item.fa:
 
-                        rating = get_filmaffinity_data(
-                            content_title, year, item.fa_genre)
+                        if item.fa_genre == 'TV_SE':
+                            rating = get_filmaffinity_data(content_title)
+
+                            if rating[0] is None:
+                                 rating = get_filmaffinity_data_advanced(content_title, year, item.fa_genre)
+                        else:
+                            rating = get_filmaffinity_data_advanced(content_title, year, item.fa_genre)
 
                         if item.parent_title.startswith('Ultra HD '):
                             quality = 'UHD'
@@ -1104,12 +1109,40 @@ def parse_title(title):
     return {'title': extract_title(title), 'year': extract_year(title)}
 
 
-def get_filmaffinity_data(title, year, genre):
+def get_filmaffinity_data_advanced(title, year, genre):
     url = "https://www.filmaffinity.com/es/advsearch.php?stext=" + title.replace(' ',
                                                                                  '+') + "&stype%5B%5D" \
                                                                                         "=title&country=" \
                                                                                         "&genre=" + genre + \
           "&fromyear=" + year + "&toyear=" + year
+
+    logger.info(url)
+
+    data = httptools.downloadpage(url).data
+
+    res = re.compile(
+        "< *?div +class *?= *?\"avgrat-box\" *?> *?([0-9,]+) *?<",
+        re.DOTALL).search(data)
+
+    res_thumb = re.compile(
+            "https://pics\\.filmaffinity\\.com/[^\"]+-msmall\\.jpg",
+            re.DOTALL).search(data)
+
+    if res:
+        rate = res.group(1).replace(',', '.')
+    else:
+        rate = None
+
+    if res_thumb:
+        thumb_url = res_thumb.group(0)
+    else:
+        thumb_url = None
+
+    return [rate, thumb_url]
+
+
+def get_filmaffinity_data(title):
+    url = "https://www.filmaffinity.com/es/search.php?stext=" + title.replace(' ', '+')
 
     logger.info(url)
 
