@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.5"
+NEIFLIX_VERSION = "1.6"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -43,6 +43,11 @@ try:
 	HISTORY = [line.rstrip('\n') for line in open(xbmc.translatePath("special://home/temp/kodi_nei_history"))]
 except:
 	HISTORY = []
+
+try:
+	URLS_COMPRESS_BLACKLIST = [line.rstrip('\n') for line in open(xbmc.translatePath("special://home/temp/kodi_nei_urls_compress_blacklist"))]
+except:
+	URLS_COMPRESS_BLACKLIST = []
 
 if USE_MC_REVERSE:
     
@@ -80,6 +85,16 @@ TITLES_BLACKLIST = [
         "neiflix").split(',')] if config.get_setting(
         "neiflix_blacklist_titles",
         "neiflix") else []
+
+
+def url_blacklist(url):
+
+	if url not in URLS_COMPRESS_BLACKLIST:
+
+		URLS_COMPRESS_BLACKLIST.append(url)
+
+		with open(xbmc.translatePath("special://home/temp/kodi_nei_urls_compress_blacklist"), 'a+') as file:
+			file.write((url + "\n").encode('utf-8'))
 
 
 def login():
@@ -287,9 +302,9 @@ def foro(item):
 
         for scrapedmsg, scrapedurl, scrapedtitle, uploader in matches:
 
-            if uploader not in UPLOADERS_BLACKLIST and not any(word in scrapedtitle for word in TITLES_BLACKLIST):
+            url = urlparse.urljoin(item.url, scrapedurl)
 
-                url = urlparse.urljoin(item.url, scrapedurl)
+            if url not in URLS_COMPRESS_BLACKLIST and uploader not in UPLOADERS_BLACKLIST and not any(word in scrapedtitle for word in TITLES_BLACKLIST):
 
                 scrapedtitle = scrapertools.htmlclean(scrapedtitle)
 
@@ -665,6 +680,8 @@ def get_mc_links_group(item):
 
 	                if compress:
 
+	                    url_blacklist(item.url)
+
 	                    itemlist.append(Item(channel=item.channel,
 	                                         title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE "
 	                                               "(habla con el uploader para que lo suba sin comprimir).[/B][/COLOR]",
@@ -711,6 +728,8 @@ def get_mc_links_group(item):
 					compress = compress_pattern.search(attributes['n'])
 
 					if compress:
+
+						url_blacklist(item.url)
 
 						itemlist.append(Item(channel=item.channel,
 					             title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE "
@@ -871,6 +890,9 @@ def find_mc_links(item, data):
 	                        compress = compress_pattern.search(name)
 
 	                        if compress:
+
+	                            url_blacklist(item.url)
+
 	                            itemlist.append(Item(channel=item.channel,
 	                                                 title="[COLOR red][B]ESTE VÍDEO ESTÁ COMPRIMIDO Y NO ES COMPATIBLE"
 	                                                       " (habla con el uploader para que lo suba sin comprimir)."
