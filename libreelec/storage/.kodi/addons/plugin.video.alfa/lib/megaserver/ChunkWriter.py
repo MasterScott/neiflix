@@ -6,6 +6,8 @@ import time
 import Queue
 import Chunk
 import os
+from platformcode import logger
+
 
 CHUNK_SIZE = 1048576
 
@@ -29,18 +31,18 @@ class ChunkWriter():
 
 	def run(self):
 
-		print("ChunkWriter HELLO!")
+		logger.info("ChunkWriter HELLO!")
 
-		while not self.exit and self.bytes_written < self.end_offset and self.cursor._file._client.running:
+		while not self.exit and self.bytes_written < self.end_offset:
 
-			while not self.exit and self.cursor._file._client.running and self.bytes_written < self.end_offset and self.bytes_written in self.queue:
+			while not self.exit and self.bytes_written < self.end_offset and self.bytes_written in self.queue:
 
 				current_chunk = self.queue.pop(self.bytes_written)
 
 				try:
 					os.write(self.pipe, current_chunk.data)
 
-					print("ChunkWriter chunk %d escrito"%current_chunk.offset)
+					logger.info("ChunkWriter chunk %d escrito"%current_chunk.offset)
 
 					self.bytes_written+=current_chunk.size
 
@@ -48,18 +50,18 @@ class ChunkWriter():
 						self.cv_queue_full.notifyAll()
 
 				except Exception as e:
-					print(str(e))
+					logger.info(str(e))
 
-			if not self.exit and self.cursor._file._client.running and self.bytes_written < self.end_offset:
+			if not self.exit and self.bytes_written < self.end_offset:
 
-				print("ChunkWriter me duermo hasta que haya chunks nuevos en la cola")
+				logger.info("ChunkWriter me duermo hasta que haya chunks nuevos en la cola")
 
 				with self.cv_new_element:
 					self.cv_new_element.wait(1)
 
 		self.exit = True
 
-		print("ChunkWriter BYE BYE")
+		logger.info("ChunkWriter BYE BYE")
 
 
 	def nextOffset(self):

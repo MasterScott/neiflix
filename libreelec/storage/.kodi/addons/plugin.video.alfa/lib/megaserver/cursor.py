@@ -8,7 +8,7 @@ import ChunkWriter
 import time
 import os
 import urllib2
-from platformcode import platformtools
+from platformcode import platformtools,logger
 from .crypto import *
 try:
     from Crypto.Util import Counter
@@ -83,28 +83,30 @@ class Cursor(object):
 
     def stop_multi_download(self):
 
+        logger.info("Cursor stopping multi download!")
+
         if self.pipe_r:
             try:
                 os.close(self.pipe_r)
             except Exception as e:
-                print(str(e))
+                logger.info(str(e))
 
         if self.pipe_w:
             try:
                 os.close(self.pipe_w)
             except Exception as e:
-                print(str(e))
+                logger.info(str(e))
         try:
             if self.chunk_writer:
                 self.chunk_writer.exit = True
         except Exception as e:
-            print(str(e))
+            logger.info(str(e))
 
         for c in self.chunk_downloaders:
             try:
                 c.exit = True
             except Exception as e:
-                print(str(e))
+                logger.info(str(e))
 
         self.chunk_downloaders = None
 
