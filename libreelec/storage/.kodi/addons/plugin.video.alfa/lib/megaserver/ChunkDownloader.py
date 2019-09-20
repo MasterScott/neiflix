@@ -4,7 +4,6 @@ import threading
 import urllib2
 import Chunk
 import time
-import MegaProxyManager
 from platformcode import logger
 
 MAX_CHUNK_BUFFER_SIZE = 20
@@ -15,10 +14,11 @@ FORCE_PROXY_MODE=False
 
 class ChunkDownloader():
 
-	def __init__(self, id, chunk_writer):
+	def __init__(self, id, cursor):
 		self.id = id
-		self.chunk_writer = chunk_writer
-		self.proxy_manager = MegaProxyManager.MegaProxyManager()
+		self.cursor = cursor
+		self.chunk_writer = cursor.chunk_writer
+		self.proxy_manager = cursor.proxy_manager
 		self.url = self.chunk_writer.cursor._file.url
 		self.proxy = None
 		self.exit = False
@@ -34,8 +34,6 @@ class ChunkDownloader():
 
 		offset = -1
 
-		turbo = False
-
 		while not self.chunk_writer.exit and not self.exit:
 
 			try:
@@ -48,10 +46,7 @@ class ChunkDownloader():
 				if not self.chunk_writer.exit and not self.exit:
 
 					if error509 or FORCE_PROXY_MODE:
-						if not turbo:
-							self.chunk_writer.cursor.workers_turbo(WORKERS_TURBO)
-							turbo = True
-
+						
 						if self.proxy:
 							logger.info("ChunkDownloader[%d] bloqueando proxy %s" % (self.id, self.proxy))
 							self.proxy_manager.block_proxy(self.proxy)

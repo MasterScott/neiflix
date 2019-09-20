@@ -5,7 +5,7 @@ import collections
 import time
 
 PROXY_LIST_URL='https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt'
-PROXY_BLOCK_TIME = 30
+PROXY_BLOCK_TIME = 180
 
 class MegaProxyManager():
 

@@ -1,13 +1,13 @@
-74a96b1bad37987ed3bece7f0d3e7f5e0307f666  ChunkDownloader.py
+7f38266adeaf33bcc40f49d4c0282d1b10a5b593  ChunkDownloader.py
 58ce5dd8df23fd7ba7be0ce45208f35820b99328  Chunk.py
 f8efd5b554dadedc53c94aa2816a5006565a5955  ChunkWriter.py
 9165e99bbecd91341dc8e65b4ffb7ca6f4654f56  client.py
 29dd181329d0aee05e10bfffc5ca76de311cbc9b  crypto.py
-6876dcc9685ee8a3024f104089281b631c739d73  cursor.py
+f33c7d3eff091df19da5efecfb6675656a6dc7bd  cursor.py
 fa9ec1f53f95389c808687cd1dc60c55402109f7  file.py
 f00fe887ed1169ae30cd3916e493eccdd2bc962d  handler.py
 c5f96b17e0ad949616eab3c1296bc2fffd82fa48  __init__.py
-264e3a78eb6e49ec58f9b3ddf62a37b2b19d5073  MegaProxyManager.py
+fbb7d5e4c9a1064267fd8ac9e1ff9a11afc3d975  MegaProxyManager.py
 fe0dc578da890bd6e1ef24fb32a59f94ec7d93aa  mega.py
 ef5ecbbe85b5176558ed82a34fafa9d84f7daf95  proxy.py
 04d5fe83bf17a1051746a108a245b33fda022c96  server.py

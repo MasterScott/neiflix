@@ -4,6 +4,7 @@
 import threading
 import Chunk
 import ChunkDownloader
+import MegaProxyManager
 import ChunkWriter
 import time
 import os
@@ -25,9 +26,10 @@ class Cursor(object):
         self.pipe_w=None
         self.chunk_writer=None
         self.chunk_downloaders=None
-        self.turbo_lock=threading.Lock()
+        self.workers_lock=threading.Lock()
         self.initial_value = file.initial_value
         self.k = file.k
+        self.proxy_manager = MegaProxyManager.MegaProxyManager()
 
 
     def mega_request(self, offset):
@@ -53,33 +55,16 @@ class Cursor(object):
 
         self.chunk_downloaders = []
 
+        self.workers_lock.acquire()
+
         for c in range(0,CHUNK_WORKERS):
-            chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
+            chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self)
             self.chunk_downloaders.append(chunk_downloader)
             t = threading.Thread(target=chunk_downloader.run)
             t.daemon = True
             t.start()
 
-
-    def workers_turbo(self, workers):
-
-        if self.chunk_downloaders and self.turbo_lock.acquire(False):
-
-            current_workers = len(self.chunk_downloaders)
-
-            if not self.chunk_writer.exit and current_workers < workers:
-
-                for c in range(current_workers, workers):
-                    chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self.chunk_writer)
-                    self.chunk_downloaders.append(chunk_downloader)
-                    t = threading.Thread(target=chunk_downloader.run)
-                    t.daemon = True
-                    t.start()
-
-                platformtools.dialog_notification("NEIFLIX", "MEGA PROXY (TURBO) MODE ENABLED")
-
-            self.turbo_lock.release()
-
+        self.workers_lock.release()
 
     def stop_multi_download(self):
 
