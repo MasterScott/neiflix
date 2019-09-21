@@ -26,7 +26,6 @@ class Cursor(object):
         self.pipe_w=None
         self.chunk_writer=None
         self.chunk_downloaders=None
-        self.workers_lock=threading.Lock()
         self.initial_value = file.initial_value
         self.k = file.k
         self.proxy_manager = MegaProxyManager.MegaProxyManager()
@@ -55,16 +54,15 @@ class Cursor(object):
 
         self.chunk_downloaders = []
 
-        self.workers_lock.acquire()
+        if len(self.chunk_downloaders) < CHUNK_WORKERS:
 
-        for c in range(0,CHUNK_WORKERS):
-            chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self)
-            self.chunk_downloaders.append(chunk_downloader)
-            t = threading.Thread(target=chunk_downloader.run)
-            t.daemon = True
-            t.start()
+            for c in range(0,CHUNK_WORKERS):
+                chunk_downloader = ChunkDownloader.ChunkDownloader(c+1, self)
+                self.chunk_downloaders.append(chunk_downloader)
+                t = threading.Thread(target=chunk_downloader.run)
+                t.daemon = True
+                t.start()
 
-        self.workers_lock.release()
 
     def stop_multi_download(self):
 
@@ -84,6 +82,10 @@ class Cursor(object):
         try:
             if self.chunk_writer:
                 self.chunk_writer.exit = True
+
+                with self.chunk_writer.cv_new_element:
+                    self.chunk_writer.cv_new_element.notify()
+
         except Exception as e:
             logger.info(str(e))
 

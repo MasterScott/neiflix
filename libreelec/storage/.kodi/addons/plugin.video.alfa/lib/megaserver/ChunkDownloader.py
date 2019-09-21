@@ -8,7 +8,6 @@ from platformcode import logger
 
 MAX_CHUNK_BUFFER_SIZE = 20
 BLOCK_SIZE = 16*1024
-WORKERS_TURBO = 20
 SOCKET_TIMEOUT=15
 FORCE_PROXY_MODE=False
 
@@ -46,8 +45,8 @@ class ChunkDownloader():
 				if not self.chunk_writer.exit and not self.exit:
 
 					if error509 or FORCE_PROXY_MODE:
-						
-						if self.proxy:
+
+						if self.proxy and error509:
 							logger.info("ChunkDownloader[%d] bloqueando proxy %s" % (self.id, self.proxy))
 							self.proxy_manager.block_proxy(self.proxy)
 
