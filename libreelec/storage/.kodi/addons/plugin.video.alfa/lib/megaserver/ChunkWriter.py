@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import threading
-import MegaProxyManager
 import time
 import Queue
 import Chunk
@@ -25,7 +24,6 @@ class ChunkWriter():
 		self.exit = False
 		self.next_offset_required = start_offset
 		self.chunk_offset_lock = threading.Lock()
-		self.proxy_manager = MegaProxyManager.MegaProxyManager()
 		self.offset_rejected = Queue.Queue()
 
 
