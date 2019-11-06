@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.8"
+NEIFLIX_VERSION = "1.9"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -278,10 +278,7 @@ def foro(item):
         action = "foro"
     else:
         video_links = True
-        itemlist = find_video_mega_links(item, data)
-
-        if not itemlist:
-        	itemlist = find_video_gvideo_links(item, data)
+        itemlist = find_video_mega_links(item, data) + find_video_gvideo_links(item, data)
 
     if not video_links:
 
@@ -582,7 +579,7 @@ def get_video_links_group(item):
 	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
+	                        Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
 	                             folder=False))
 
 	            else:
@@ -691,7 +688,7 @@ def get_video_links_group(item):
 	                    file.write((url + "\n").encode('utf-8'))
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
+	                        Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
 	                             parentContent=item, folder=False))
 
         else:
@@ -730,7 +727,7 @@ def get_video_links_group(item):
 
 						if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
 							title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
-							itemlist.append(Item(channel=item.channel, action="play", server='nei', title=title, url=url, parentContent=item, folder=False))
+							itemlist.append(Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url, parentContent=item, folder=False))
 
     return itemlist
 
@@ -759,9 +756,9 @@ def find_video_gvideo_links(item, data):
         if len(matches) > 1:
 
             for url in matches:
-                itemlist.append(Item(channel=item.channel, action="play", server='gvideo', title=item.title, url=url, parentContent=item, folder=False))
+                itemlist.append(Item(channel=item.channel, action="play", server='gvideo', title='[GVIDEO] '+item.title, url=url, parentContent=item, folder=False))
         else:
-            itemlist.append(Item(channel=item.channel, action="play", server='gvideo', title=item.title, url=matches[0], parentContent=item, folder=False))
+            itemlist.append(Item(channel=item.channel, action="play", server='gvideo', title='[GVIDEO] '+item.title, url=matches[0], parentContent=item, folder=False))
 
     return itemlist
 
@@ -831,7 +828,7 @@ def find_video_mega_links(item, data):
 	                    title = name + ' [' + str(format_bytes(float(size))) + ']'
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
+	                        Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
 	                             parentContent=item, folder=False))
 
 	                else:
@@ -920,7 +917,7 @@ def find_video_mega_links(item, data):
 	                            title = name + ' [' + str(format_bytes(size)) + ']'
 	                            url = url + '#' + name + '#' + str(size) + '#' + key + '#' + noexpire
 	                            file.write((url + "\n").encode('utf-8'))
-	                            itemlist.append(Item(channel=item.channel, action="play", server='nei', title=title,
+	                            itemlist.append(Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title,
 	                                                 url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item, folder=False))
 
             else:
@@ -958,7 +955,7 @@ def find_video_mega_links(item, data):
                                                      action="", url="", folder=False))
                                 break
                             else:
-                                itemlist.append(Item(channel=item.channel, action="play", server='nei', title=title, url=url, parentContent=item, folder=False))
+                                itemlist.append(Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url, parentContent=item, folder=False))
 
 
     return itemlist
