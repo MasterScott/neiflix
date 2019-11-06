@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.7"
+NEIFLIX_VERSION = "1.8"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -263,7 +263,7 @@ def foro(item):
 
     data = httptools.downloadpage(item.url).data
 
-    mc_links = False
+    video_links = False
 
     final_item = False
 
@@ -277,10 +277,13 @@ def foro(item):
         final_item = True
         action = "foro"
     else:
-        mc_links = True
-        itemlist = find_mc_links(item, data)
+        video_links = True
+        itemlist = find_video_mega_links(item, data)
 
-    if not mc_links:
+        if not itemlist:
+        	itemlist = find_video_gvideo_links(item, data)
+
+    if not video_links:
 
         matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -541,7 +544,7 @@ def gen_index(item):
     return itemlist
 
 
-def get_mc_links_group(item):
+def get_video_links_group(item):
     mega_sid = mega_login(False)
 
     itemlist = []
@@ -606,7 +609,7 @@ def get_mc_links_group(item):
 
 	                        os.remove(filename_hash)
 
-	                        return get_mc_links_group(item)
+	                        return get_video_links_group(item)
 	                else:
 
 	                    return itemlist
@@ -732,7 +735,38 @@ def get_mc_links_group(item):
     return itemlist
 
 
-def find_mc_links(item, data):
+def find_video_gvideo_links(item, data):
+    msg_id = re.compile('subject_([0-9]+)', re.IGNORECASE).search(data)
+
+    if msg_id:
+
+        thanks_match = re.compile(
+            '/\?action=thankyou;msg=' +
+            msg_id.group(1),
+            re.IGNORECASE).search(data)
+
+        if thanks_match:
+            data = httptools.downloadpage(item.url + thanks_match.group(0)).data
+
+    itemlist = []
+
+    patron = "(?:https|http)://(?:docs|drive).google.com/file/d/[^/]+/(?:preview|edit|view)" #Hay más variantes de enlaces
+
+    matches = re.compile(patron, re.DOTALL).findall(data)
+
+    if matches:
+
+        if len(matches) > 1:
+
+            for url in matches:
+                itemlist.append(Item(channel=item.channel, action="play", server='gvideo', title=item.title, url=url, parentContent=item, folder=False))
+        else:
+            itemlist.append(Item(channel=item.channel, action="play", server='gvideo', title=item.title, url=matches[0], parentContent=item, folder=False))
+
+    return itemlist
+
+
+def find_video_mega_links(item, data):
 
     msg_id = re.compile('subject_([0-9]+)', re.IGNORECASE).search(data)
 
@@ -759,13 +793,13 @@ def find_mc_links(item, data):
             i = 1
 
             for id in matches:
-                itemlist.append(Item(channel=item.channel, action="get_mc_links_group",
+                itemlist.append(Item(channel=item.channel, action="get_video_links_group",
                                      title='[' + str(i) + '/' + str(len(matches)) + '] ' + item.title, url=item.url,
                                      mc_group_id=id, folder=True))
 
                 i = i + 1
         else:
-            itemlist = get_mc_links_group(
+            itemlist = get_video_links_group(
                 Item(channel=item.channel, action='', title='', url=item.url, mc_group_id=matches[0], folder=True))
     else:
 
@@ -817,7 +851,7 @@ def find_mc_links(item, data):
 
 	                            os.remove(filename_hash)
 
-	                            return find_mc_links(item, data)
+	                            return find_video_mega_links(item, data)
 	                    else:
 
 	                        return itemlist
