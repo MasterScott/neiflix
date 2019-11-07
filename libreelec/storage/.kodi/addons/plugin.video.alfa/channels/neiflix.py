@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.9"
+NEIFLIX_VERSION = "1.10"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -541,7 +541,7 @@ def gen_index(item):
     return itemlist
 
 
-def get_video_links_group(item):
+def get_video_mega_links_group(item):
     mega_sid = mega_login(False)
 
     itemlist = []
@@ -606,7 +606,7 @@ def get_video_links_group(item):
 
 	                        os.remove(filename_hash)
 
-	                        return get_video_links_group(item)
+	                        return get_video_mega_links_group(item)
 	                else:
 
 	                    return itemlist
@@ -790,13 +790,13 @@ def find_video_mega_links(item, data):
             i = 1
 
             for id in matches:
-                itemlist.append(Item(channel=item.channel, action="get_video_links_group",
+                itemlist.append(Item(channel=item.channel, action="get_video_mega_links_group",
                                      title='[' + str(i) + '/' + str(len(matches)) + '] ' + item.title, url=item.url,
                                      mc_group_id=id, folder=True))
 
                 i = i + 1
         else:
-            itemlist = get_video_links_group(
+            itemlist = get_video_mega_links_group(
                 Item(channel=item.channel, action='', title='', url=item.url, mc_group_id=matches[0], folder=True))
     else:
 
