@@ -25,7 +25,7 @@ from platformcode import platformtools
 
 CHECK_MEGA_LIB = True
 
-NEIFLIX_VERSION = "1.10"
+NEIFLIX_VERSION = "1.11"
 
 NEIFLIX_LOGIN = config.get_setting("neiflix_user", "neiflix")
 
@@ -573,13 +573,13 @@ def get_video_mega_links_group(item):
 
 	                    size = url_split[2]
 
-	                    title = name + ' [' + str(format_bytes(float(size))) + ']'
+	                    title = "[MEGA] "+name + ' [' + str(format_bytes(float(size))) + ']'
 
-	                    if hashlib.sha1(title).hexdigest() in HISTORY:
+	                    if hashlib.sha1(title.encode("utf-8")).hexdigest() in HISTORY:
 	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
+	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid, parentContent=item,
 	                             folder=False))
 
 	            else:
@@ -678,7 +678,7 @@ def get_video_mega_links_group(item):
 
 	                else:
 
-	                    title = name + ' [' + str(format_bytes(size)) + ']'
+	                    title = "[MEGA] "+name + ' [' + str(format_bytes(size)) + ']'
 
 	                    if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
 	                    	title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
@@ -688,7 +688,7 @@ def get_video_mega_links_group(item):
 	                    file.write((url + "\n").encode('utf-8'))
 
 	                    itemlist.append(
-	                        Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
+	                        Item(channel=item.channel, action="play", server='nei', title=title, url=url + '#' + MC_REVERSE_DATA + '#' + mega_sid,
 	                             parentContent=item, folder=False))
 
         else:
@@ -708,7 +708,7 @@ def get_video_mega_links_group(item):
 						k = (key[0] ^ key[4], key[1] ^ key[5], key[2] ^ key[6], key[3] ^ key[7])
 						attributes = crypto.base64_url_decode(file['at'])
 						attributes = crypto.decrypt_attr(attributes, k)
-						title=attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
+						title="[MEGA] "+attributes['n'] + ' [' + str(format_bytes(file['s'])) + ']'
 					else:
 						title=url
 
@@ -727,7 +727,7 @@ def get_video_mega_links_group(item):
 
 						if hashlib.sha1(title.encode('utf-8')).hexdigest() in HISTORY:
 							title = "[COLOR green][B](VISTO)[/B][/COLOR] "+title
-							itemlist.append(Item(channel=item.channel, action="play", server='nei', title="[MEGA] "+title, url=url, parentContent=item, folder=False))
+							itemlist.append(Item(channel=item.channel, action="play", server='nei', title=title, url=url, parentContent=item, folder=False))
 
     return itemlist
 
